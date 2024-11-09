@@ -2,6 +2,7 @@
 <?php 
 include('func.php');  
 include('newfunc.php');
+include('session_tracking.php');
 $con=mysqli_connect("localhost","root","","myhmsdb");
 
 

@@ -3,7 +3,7 @@
 $con=mysqli_connect("localhost","root","","myhmsdb");
 
 include('newfunc.php');
-
+include('session_tracking.php');
 if(isset($_POST['docsub']))
 {
   $doctor=$_POST['doctor'];

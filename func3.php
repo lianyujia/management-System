@@ -9,6 +9,10 @@ if(isset($_POST['adsub'])){
 	if(mysqli_num_rows($result)==1)
 	{
 		$_SESSION['username']=$username;
+		$_SESSION['start_time'] = time(); // Current timestamp
+        $_SESSION['expiration_time'] = 120; // Expiration time in seconds
+        $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
+
 		header("Location:admin-panel1.php");
 	}
 	else

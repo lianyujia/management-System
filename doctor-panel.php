@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php 
 include('func1.php');
+include('session_tracking.php');
 $con=mysqli_connect("localhost","root","","myhmsdb");
 $doctor = $_SESSION['dname'];
 if(isset($_GET['cancel']))

@@ -8,7 +8,7 @@ if (mysqli_connect_errno()) {
 
 if (isset($_POST['patsub'])) {
   $email = $_POST['email'];
-  $password = $_POST['password2'];  // Get the password entered by the user
+  $password = $_POST['password2']; // Plain-text password entered by the user
 
   // Escape input to prevent SQL injection
   $email = mysqli_real_escape_string($con, $email);
@@ -18,23 +18,18 @@ if (isset($_POST['patsub'])) {
   $result = mysqli_query($con, $query);
 
   if (!$result) {
-      // Query failed, print error
-      echo "Error: " . mysqli_error($con);
-      exit;
+      die("Error: " . mysqli_error($con));
   }
 
   if (mysqli_num_rows($result) == 1) {
-      // Fetch the row
-      $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-
-      // Get the stored hashed password from the database
+      $row = mysqli_fetch_assoc($result);
       $stored_hashed_password = $row['password'];
-      
 
-      echo "<script>alert('Entered Password: $password<br>Stored Hashed Password: $stored_hashed_password'); window.location.href = 'index1.php';</script>";
+      // Debug output
+      echo "Entered Password: $password<br>";
+      echo "Stored Hashed Password: $stored_hashed_password<br>";
 
-
-      // Verify the entered password against the stored hash
+      // Test password verification
       if (password_verify($password, $stored_hashed_password)) {
         // Password matches, set session variables
         $_SESSION['pid'] = $row['pid'];
@@ -44,18 +39,20 @@ if (isset($_POST['patsub'])) {
         $_SESSION['gender'] = $row['gender'];
         $_SESSION['contact'] = $row['contact'];
         $_SESSION['email'] = $row['email'];
+
+        $_SESSION['start_time'] = time(); // Current timestamp
+        $_SESSION['expiration_time'] = 120; // Expiration time in seconds
+        $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
+
     
         // Redirect to admin panel
         header("Location: admin-panel.php");
         exit();
     } else {
-        // Incorrect password, show alert and redirect to login page
-        echo "<script>alert('Invalid Password. Try Again! $password $stored_hased_password'); window.location.href = 'index1.php';</script>";
+        // Incorrect password
+        echo "<script>alert('Invalid Password. Try Again!'); window.location.href = 'index1.php';</script>";
     }
-  } else {
-      // No matching email found
-      echo "<script>alert('Invalid Username or Password. $password $stored_hased_password'); window.location.href = 'index1.php';</script>";
-  }
+    
 }
 
 
@@ -243,5 +240,6 @@ function display_admin_panel(){
 })</script>
   </body>
 </html>';
+}
 }
 ?>

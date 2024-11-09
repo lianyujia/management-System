@@ -13,6 +13,9 @@ if(isset($_POST['docsub1'])){
 		      $_SESSION['dname']=$row['username'];
       
     }
+    $_SESSION['start_time'] = time(); // Current timestamp
+    $_SESSION['expiration_time'] = 120; // Expiration time in seconds
+    $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 		header("Location:doctor-panel.php");
 	}
 	else{
