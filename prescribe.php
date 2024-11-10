@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <?php
 include('func1.php');
+use Dotenv\Dotenv;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+function encryptData($data) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+  $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+  return [
+      'data' => $encrypted,
+      'iv' => base64_encode($iv) 
+  ];
+}
+
+function decryptData($encryptedData, $iv) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+
+  $decodedIV = base64_decode($iv);
+
+  // decrypt the data
+  $decrypted = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+
+  return $decrypted; 
+}
+
 $pid='';
 $ID='';
 $appdate='';
@@ -19,7 +50,15 @@ $pid = $_GET['pid'];
 
 
 
-if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && isset($_POST['appdate']) && isset($_POST['apptime']) && isset($_POST['lname']) && isset($_POST['fname'])){
+if (
+  isset($_POST['prescribe']) && 
+  isset($_POST['pid']) && 
+  isset($_POST['ID']) && 
+  isset($_POST['appdate']) && 
+  isset($_POST['apptime']) && 
+  isset($_POST['lname']) && 
+  isset($_POST['fname'])
+) {
   $appdate = $_POST['appdate'];
   $apptime = $_POST['apptime'];
   $disease = $_POST['disease'];
@@ -29,15 +68,48 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
   $pid = $_POST['pid'];
   $ID = $_POST['ID'];
   $prescription = $_POST['prescription'];
-  
-  $query=mysqli_query($con,"insert into prestb(doctor,pid,ID,fname,lname,appdate,apptime,disease,allergy,prescription) values ('$doctor','$pid','$ID','$fname','$lname','$appdate','$apptime','$disease','$allergy','$prescription')");
-    if($query)
-    {
+  $doctor = $_SESSION['dname']; // Assuming doctor is stored in session
+
+  // Encrypt sensitive fields
+  $encryptedFname = encryptData($fname);
+  $encryptedLname = encryptData($lname);
+  $encryptedDisease = encryptData($disease);
+  $encryptedAllergy = encryptData($allergy);
+  $encryptedPrescription = encryptData($prescription);
+
+  // Insert into database with encrypted values
+  $query = mysqli_query($con, "INSERT INTO prestb (
+      doctor,
+      pid,
+      ID,
+      fname, fname_iv,
+      lname, lname_iv,
+      appdate,
+      apptime,
+      disease, disease_iv,
+      allergy, allergy_iv,
+      prescription, prescription_iv
+  ) VALUES (
+      '$doctor',
+      '$pid',
+      '$ID',
+      '{$encryptedFname['data']}', '{$encryptedFname['iv']}',
+      '{$encryptedLname['data']}', '{$encryptedLname['iv']}',
+      '$appdate',
+      '$apptime',      
+      '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
+      '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
+      '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}'
+  )");
+
+  if ($query) {
       echo "<script>alert('Prescribed successfully!');</script>";
-    }
-    else{
+  } else {
       echo "<script>alert('Unable to process your request. Try again!');</script>";
-    }
+  }
+
+
+
   // else{
   //   echo "<script>alert('GET is not working!');</script>";
   // }initial

@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // check if the user is logged in
-if (isset($_SESSION['username']) || isset($_SESSION['dname']) || isset($_SESSION['pid'])) {
+if (isset($_SESSION['username']) || isset($_SESSION['doc_id']) || isset($_SESSION['pid'])) {
     echo "<script>console.log('Session Active');</script>";
 
     // check if session expiration variables are set

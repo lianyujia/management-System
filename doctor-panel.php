@@ -3,6 +3,37 @@
 include('func1.php');
 include('session_tracking.php');
 $con=mysqli_connect("localhost","root","","myhmsdb");
+use Dotenv\Dotenv;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+function encryptData($data) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+  $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+  return [
+      'data' => $encrypted,
+      'iv' => base64_encode($iv) 
+  ];
+}
+
+function decryptData($encryptedData, $iv) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+
+  $decodedIV = base64_decode($iv);
+
+  // decrypt the data
+  $decrypted = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+
+  return $decrypted; 
+}
+
 $doctor = $_SESSION['dname'];
 if(isset($_GET['cancel']))
   {
@@ -102,7 +133,8 @@ if(isset($_GET['cancel']))
   </style>
   <body style="padding-top:50px;">
    <div class="container-fluid" style="margin-top:50px;">
-    <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family:'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $_SESSION['dname'] ?>  </h3>
+    <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family:'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $_SESSION['dname']; ?>, Your ID: <?php echo $_SESSION['doc_id']; ?>
+    </h3>
     <div class="row">
   <div class="col-md-4" style="max-width:18%;margin-top: 3%;">
     <div class="list-group" id="list-tab" role="tablist">
@@ -158,46 +190,68 @@ if(isset($_GET['cancel']))
          </div>
     
 
-    <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-home-list">
-        
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th scope="col">Patient ID</th>
-                    <th scope="col">Appointment ID</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Gender</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Contact</th>
-                    <th scope="col">Appointment Date</th>
-                    <th scope="col">Appointment Time</th>
-                    <th scope="col">Current Status</th>
-                    <th scope="col">Action</th>
-                    <th scope="col">Prescribe</th>
+         <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-home-list">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Patient ID</th>
+                <th scope="col">Appointment ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Email</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Appointment Date</th>
+                <th scope="col">Appointment Time</th>
+                <th scope="col">Current Status</th>
+                <th scope="col">Action</th>
+                <th scope="col">Prescribe</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+            if (!$con) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
 
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-                    $dname = $_SESSION['dname'];
-                    $query = "select pid,ID,fname,lname,gender,email,contact,appdate,apptime,userStatus,doctorStatus from appointmenttb where doctor='$dname';";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                      ?>
-                      <tr>
-                      <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['ID'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['gender'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td>
+            $dname = $_SESSION['doc_id'];
+
+            // Updated query to fetch IVs
+            $query = "SELECT 
+                        pid, ID, fname, lname, 
+                        gender, gender_iv, 
+                        email, email_iv, 
+                        contact, contact_iv, 
+                        appdate, appdate_iv, 
+                        apptime, apptime_iv, 
+                        userStatus, doctorStatus 
+                      FROM appointmenttb 
+                      WHERE doctor = ?";
+            $stmt = $con->prepare($query);
+            $stmt->bind_param("s", $dname);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            while ($row = $result->fetch_assoc()) {
+                // Decrypt necessary fields
+                $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
+                $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
+                $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+            ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['pid']); ?></td>
+                    <td><?php echo htmlspecialchars($row['ID']); ?></td>
+                    <td><?php echo htmlspecialchars($row['fname']); ?></td>
+                    <td><?php echo htmlspecialchars($row['lname']); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedGender); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedEmail); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedContact); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
+                    <td>
                     <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
                     {
                       echo "Active";
@@ -273,31 +327,48 @@ if(isset($_GET['cancel']))
                 <tbody>
                   <?php 
 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
+                      $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+                      global $con;
 
-                    $query = "select pid,fname,lname,ID,appdate,apptime,disease,allergy,prescription from prestb where doctor='$doctor';";
-                    
-                    $result = mysqli_query($con,$query);
-                    if(!$result){
+                      $query = "SELECT 
+                        p.pid, 
+                        p.fname, p.fname_iv, 
+                        p.lname, p.lname_iv, 
+                        p.ID, 
+                        a.appdate, a.appdate_iv, 
+                        a.apptime, a.apptime_iv, 
+                        p.disease, p.disease_iv, 
+                        p.allergy, p.allergy_iv, 
+                        p.prescription, p.prescription_iv 
+                      FROM prestb p
+                      JOIN appointmenttb a ON p.ID = a.ID
+                      WHERE p.doctor = '$doctor';";
+
+                  $result = mysqli_query($con, $query);
+                  if (!$result) {
                       echo mysqli_error($con);
-                    }
-                    
+                  }
 
-                    while ($row = mysqli_fetch_array($result)){
+                  while ($row = mysqli_fetch_array($result)) {
+                      // Decrypt sensitive fields
+                      $decryptedFname = decryptData($row['fname'], $row['fname_iv']);
+                      $decryptedLname = decryptData($row['lname'], $row['lname_iv']);
+                      $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                      $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+                      $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
+                      $decryptedAllergy = decryptData($row['allergy'], $row['allergy_iv']);
+                      $decryptedPrescription = decryptData($row['prescription'], $row['prescription_iv']);
                   ?>
                       <tr>
-                        <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['ID'];?></td>
-                        
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td><?php echo $row['disease'];?></td>
-                        <td><?php echo $row['allergy'];?></td>
-                        <td><?php echo $row['prescription'];?></td>
-                    
+                          <td><?php echo htmlspecialchars($row['pid']); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedFname); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedLname); ?></td>
+                          <td><?php echo htmlspecialchars($row['ID']); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedDisease); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                       </tr>
                     <?php }
                     ?>

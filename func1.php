@@ -1,29 +1,53 @@
 <?php
 session_start();
 $con=mysqli_connect("localhost","root","","myhmsdb");
-if(isset($_POST['docsub1'])){
-	$dname=$_POST['username3'];
-	$dpass=$_POST['password3'];
-	$query="select * from doctb where username='$dname' and password='$dpass';";
-	$result=mysqli_query($con,$query);
-	if(mysqli_num_rows($result)==1)
-	{
-    while($row=mysqli_fetch_array($result,MYSQLI_ASSOC)){
-    
-		      $_SESSION['dname']=$row['username'];
-      
+if (isset($_POST['docsub1'])) {
+  $dname = $_POST['username3'];
+  $dpass = $_POST['password3'];
+
+  $query = "SELECT * FROM doctb WHERE username='$dname';";
+  $result = mysqli_query($con, $query);
+
+  if (mysqli_num_rows($result) > 0) { // check if any doctor with the username exists
+    $validDoctor = false; 
+    $doc_id = null; 
+
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $stored_hashed_password = $row['password'];
+
+        // check if the password matches
+        if (password_verify($dpass, $stored_hashed_password)) {
+            $validDoctor = true; // mark as valid
+            $doc_id = $row['doc_id']; 
+            break; 
+        }
     }
-    $_SESSION['start_time'] = time(); // Current timestamp
-    $_SESSION['expiration_time'] = 120; // Expiration time in seconds
-    $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
-		header("Location:doctor-panel.php");
-	}
-	else{
-    // header("Location:error2.php");
-    echo("<script>alert('Invalid Username or Password. Try Again!');
-          window.location.href = 'index.php';</script>");
-  }
+
+    if ($validDoctor) {
+        // Set session variables
+        $_SESSION['dname'] = $dname;
+        $_SESSION['doc_id'] = $doc_id; 
+        $_SESSION['start_time'] = time(); // current time
+        $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
+        $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
+
+        header("Location:doctor-panel.php");
+    } else {
+        // Password did not match for any entry
+        echo "<script>
+            alert('Invalid Username or Password.');
+            window.location.href = 'index.php';
+            </script>";
+    }
+} else {
+    // No user found with the username
+    echo "<script>
+        alert('Invalid Username or Password.');
+        window.location.href = 'index.php';
+        </script>";
 }
+}
+
 
 
 // if(isset($_POST['update_data']))  

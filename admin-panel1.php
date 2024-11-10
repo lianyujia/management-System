@@ -2,23 +2,102 @@
 <?php 
 $con=mysqli_connect("localhost","root","","myhmsdb");
 
-include('newfunc.php');
-include('session_tracking.php');
-if(isset($_POST['docsub']))
-{
-  $doctor=$_POST['doctor'];
-  $dpassword=$_POST['dpassword'];
-  $demail=$_POST['demail'];
-  $spec=$_POST['special'];
-  $docFees=$_POST['docFees'];
-  $query="insert into doctb(username,password,email,spec,docFees)values('$doctor','$dpassword','$demail','$spec','$docFees')";
-  $result=mysqli_query($con,$query);
-  if($result)
-    {
-      echo "<script>alert('Doctor added successfully!');</script>";
-  }
+use Dotenv\Dotenv;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+$mail = new PHPMailer(true);
+
+function encryptData($data) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+  $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+  return [
+      'data' => $encrypted,
+      'iv' => base64_encode($iv) 
+  ];
 }
 
+function decryptData($encryptedData, $iv) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+
+  $decodedIV = base64_decode($iv);
+
+  // decrypt the data
+  $decrypted = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+
+  return $decrypted; 
+}
+
+
+include('newfunc.php');
+include('session_tracking.php');
+if (isset($_POST['docsub'])) {
+  $doctor = $_POST['doctor'];
+  $demail = $_POST['demail'];
+  $spec = $_POST['special'];
+  $docFees = $_POST['docFees'];
+
+  // generate random password
+  function generateRandomPassword($length = 8) {
+      return substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $length);
+  }
+
+  $encryptedEmail = encryptData($demail);
+  $encryptedSpec = encryptData($spec);
+  $encryptedDocFees = encryptData($docFees);
+
+  // generate a random password
+  $randomPassword = generateRandomPassword(); // 8-character password
+  $hashedPassword = password_hash($randomPassword, PASSWORD_BCRYPT); // hash the password
+
+  // insert into the database
+  $query = "INSERT INTO doctb (username, password, email, email_iv, spec, spec_iv, docFees, doc_Fees_iv) 
+              VALUES ('$doctor', '$hashedPassword', '" . $encryptedEmail['data'] . "', '" . $encryptedEmail['iv'] . "', 
+                      '" . $encryptedSpec['data'] . "', '" . $encryptedSpec['iv'] . "', 
+                      '" . $encryptedDocFees['data'] . "', '" . $encryptedDocFees['iv'] . "')";
+    $result = mysqli_query($con, $query);
+
+  if ($result) {
+      echo "<script>alert('Doctor added successfully!');</script>";
+
+      // send the email
+      try {
+          $mail = new PHPMailer(true);
+
+          // SMTP configuration
+          $mail->isSMTP();
+          $mail->Host = 'smtp.gmail.com'; 
+          $mail->SMTPAuth = true;
+          $mail->Username = $_ENV['EMAIL_USERNAME']; 
+          $mail->Password = $_ENV['EMAIL_PASSWORD']; 
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+          $mail->Port = 587;
+      
+          // email settings
+          $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Admin'); 
+          $mail->addAddress($demail, $doctor); 
+          $mail->Subject = 'Welcome to Global Hospitals!';
+          $mail->Body = "Hello $doctor,\n\nYour doctor account has been created successfully.\nYour login credentials are:\nUsername: $doctor\nPassword: $randomPassword\n\nPlease change your password after logging in.";
+      
+          $mail->send();
+          echo "<script>alert('An email with login credentials has been sent to the doctor.');</script>";
+      } catch (Exception $e) {
+          echo "<script>alert('Error sending email: {$mail->ErrorInfo}');</script>";
+      }
+  } else {
+      echo "<script>alert('Error adding doctor!');</script>";
+  }
+}
 
 if(isset($_POST['docsub1']))
 {
@@ -260,41 +339,43 @@ if(isset($_POST['docsub1']))
         <div class="col-md-2"><input type="submit" name="doctor_search_submit" class="btn btn-primary" value="Search"></div></div>
       </form>
     </div>
-              <table class="table table-hover">
-                <thead>
-                  <tr>
+            <table class="table table-hover">
+            <thead>
+                <tr>
                     <th scope="col">Doctor Name</th>
                     <th scope="col">Specialization</th>
                     <th scope="col">Email</th>
-                    <th scope="col">Password</th>
                     <th scope="col">Fees</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-                    $query = "select * from doctb";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                      $username = $row['username'];
-                      $spec = $row['spec'];
-                      $email = $row['email'];
-                      $password = $row['password'];
-                      $docFees = $row['docFees'];
-                      
-                      echo "<tr>
-                        <td>$username</td>
-                        <td>$spec</td>
-                        <td>$email</td>
-                        <td>$password</td>
-                        <td>$docFees</td>
-                      </tr>";
-                    }
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+                if (!$con) {
+                    die("Connection failed: " . mysqli_connect_error());
+                }
 
-                  ?>
-                </tbody>
-              </table>
+                $query = "SELECT username, spec, spec_iv, email, email_iv, docFees, doc_Fees_iv FROM doctb";
+                $result = mysqli_query($con, $query);
+
+                while ($row = mysqli_fetch_array($result)) {
+                    // Decrypt the necessary fields
+                    $username = $row['username']; // Not encrypted
+                    $decryptedSpec = decryptData($row['spec'], $row['spec_iv']);
+                    $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                    $decryptedDocFees = decryptData($row['docFees'], $row['doc_Fees_iv']);
+
+                    echo "<tr>
+                        <td>$username</td>
+                        <td>$decryptedSpec</td>
+                        <td>$decryptedEmail</td>
+                        <td>$decryptedDocFees</td>
+                    </tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+
         <br>
       </div>
     
@@ -309,47 +390,51 @@ if(isset($_POST['docsub1']))
       </form>
     </div>
         
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                  <th scope="col">Patient ID</th>
+            <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Patient ID</th>
                     <th scope="col">First Name</th>
                     <th scope="col">Last Name</th>
                     <th scope="col">Gender</th>
                     <th scope="col">Email</th>
                     <th scope="col">Contact</th>
-                    <th scope="col">Password</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-                    $query = "select * from patreg";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                      $pid = $row['pid'];
-                      $fname = $row['fname'];
-                      $lname = $row['lname'];
-                      $gender = $row['gender'];
-                      $email = $row['email'];
-                      $contact = $row['contact'];
-                      $password = $row['password'];
-                      
-                      echo "<tr>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+                if (!$con) {
+                    die("Connection failed: " . mysqli_connect_error());
+                }
+
+                $query = "SELECT pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv FROM patreg";
+                $result = mysqli_query($con, $query);
+
+                while ($row = mysqli_fetch_array($result)) {
+                    // Decrypt the necessary fields
+                    $pid = $row['pid'];
+                    $fname = $row['fname'];
+                    $lname = $row['lname'];
+                    $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
+                    $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                    $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
+              
+
+                    echo "<tr>
                         <td>$pid</td>
                         <td>$fname</td>
                         <td>$lname</td>
-                        <td>$gender</td>
-                        <td>$email</td>
-                        <td>$contact</td>
-                        <td>$password</td>
-                      </tr>";
-                    }
+                        <td>$decryptedGender</td>
+                        <td>$decryptedEmail</td>
+                        <td>$decryptedContact</td>
+                     
+                    </tr>";
+                }
+                ?>
+            </tbody>
+        </table>
 
-                  ?>
-                </tbody>
-              </table>
         <br>
       </div>
 
@@ -511,12 +596,7 @@ if(isset($_POST['docsub1']))
                     </div><br><br>
                   <div class="col-md-4"><label>Email ID:</label></div>
                   <div class="col-md-8"><input type="email"  class="form-control" name="demail" required></div><br><br>
-                  <div class="col-md-4"><label>Password:</label></div>
-                  <div class="col-md-8"><input type="password" class="form-control"  onkeyup='check();' name="dpassword" id="dpassword"  required></div><br><br>
-                  <div class="col-md-4"><label>Confirm Password:</label></div>
-                  <div class="col-md-8"  id='cpass'><input type="password" class="form-control" onkeyup='check();' name="cdpassword" id="cdpassword" required>&nbsp &nbsp<span id='message'></span> </div><br><br>
-                   
-                  
+                                   
                   <div class="col-md-4"><label>Consultancy Fees:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control"  name="docFees" required></div><br><br>
                 </div>
@@ -566,20 +646,19 @@ if(isset($_POST['docsub1']))
 
                     $query = "select * from contact;";
                     $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-              
-                      #$fname = $row['fname'];
-                      #$lname = $row['lname'];
-                      #$email = $row['email'];
-                      #$contact = $row['contact'];
+                    while ($row = mysqli_fetch_array($result)) {
+                      // decrypt fields
+                      $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                      $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
+                      $decryptedMessage = decryptData($row['message'], $row['message_iv']);
                   ?>
                       <tr>
-                        <td><?php echo $row['name'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['message'];?></td>
+                          <td><?php echo htmlspecialchars($row['name']); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedEmail); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedContact); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedMessage); ?></td>
                       </tr>
-                    <?php } ?>
+                  <?php } ?>
                 </tbody>
               </table>
         <br>

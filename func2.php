@@ -1,5 +1,12 @@
 <?php
 session_start();
+require __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+// load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 // Database connection
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
@@ -7,66 +14,103 @@ if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+function encryptData($data) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+  $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+  return [
+      'data' => $encrypted,
+      'iv' => base64_encode($iv) 
+  ];
+}
+
 // Patient Registration
 if (isset($_POST['patsub1'])) {
-    $fname = $_POST['fname'];
-    $lname = $_POST['lname'];
-    $gender = $_POST['gender'];
-    $email = $_POST['email'];
-    $contact = $_POST['contact'];
-    $password = $_POST['password'];
-    $cpassword = $_POST['cpassword'];
+  $fname = $_POST['fname'];
+  $lname = $_POST['lname'];
+  $gender = $_POST['gender'];
+  $email = $_POST['email'];
+  $contact = $_POST['contact'];
+  $password = $_POST['password'];
+  $cpassword = $_POST['cpassword'];
 
-    // Check if the email already exists in the database
-    $email_check_query = "SELECT * FROM patreg WHERE email = '$email' LIMIT 1";
-    $email_check_result = mysqli_query($con, $email_check_query);
+  // Check if the email already exists in the database
+  $email_check_query = "SELECT * FROM patreg WHERE email = '$email' LIMIT 1";
+  $email_check_result = mysqli_query($con, $email_check_query);
 
-    // Check if passwords match
-    if ($password === $cpassword) {
-        // Hash the password for security
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+  // Check if passwords match
+  if ($password === $cpassword) {
+      // Hash the password for security
+      $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-      
+      // Encrypt sensitive fields
+      $encryptedEmail = encryptData($email);
+      $encryptedContact = encryptData($contact);
+      $encryptedGender = encryptData($gender);
 
-        // Prepare and execute the query
-        $stmt = $con->prepare("INSERT INTO patreg (fname, lname, gender, email, contact, password, cpassword) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $fname, $lname, $gender, $email, $contact, $hashed_password, $hashed_password);
+      // Prepare and execute the query
+      $stmt = $con->prepare(
+          "INSERT INTO patreg (fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv, password) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      );
 
-        if ($stmt->execute()) {
-            // Set session variables
-            $_SESSION['username'] = $fname . " " . $lname;
-            $_SESSION['fname'] = $fname;
-            $_SESSION['lname'] = $lname;
-            $_SESSION['gender'] = $gender;
-            $_SESSION['contact'] = $contact;
-            $_SESSION['email'] = $email;
+      // Bind parameters with appropriate type string
+      $stmt->bind_param(
+          "sssssssss",                       // Type definitions: all are strings
+          $fname,                            // First parameter
+          $lname,                            // Second parameter
+          $encryptedGender['data'],          // Third parameter (Encrypted gender)
+          $encryptedGender['iv'],            // Fourth parameter (Gender IV)
+          $encryptedEmail['data'],           // Fifth parameter (Encrypted email)
+          $encryptedEmail['iv'],             // Sixth parameter (Email IV)
+          $encryptedContact['data'],         // Seventh parameter (Encrypted contact)
+          $encryptedContact['iv'],           // Eighth parameter (Contact IV)
+          $hashed_password                   // Ninth parameter (Hashed password)
+      );
 
-            // Get the patient ID of the newly registered patient
-            $pid_query = "SELECT pid FROM patreg WHERE email = ? LIMIT 1";
-            $pid_stmt = $con->prepare($pid_query);
-            $pid_stmt->bind_param("s", $email);
-            $pid_stmt->execute();
-            $pid_stmt->bind_result($pid);
-            $pid_stmt->fetch();
-            $_SESSION['pid'] = $pid;
-            $pid_stmt->close();
+      if ($stmt->execute()) {
+          // Set session variables
+          $_SESSION['username'] = $fname . " " . $lname;
+          $_SESSION['fname'] = $fname;
+          $_SESSION['lname'] = $lname;
 
-            // Redirect to admin panel
-            header("Location: admin-panel.php");
-            exit();
-        } else {
-            // Log error and redirect to error page
-            error_log("Error inserting data: " . $stmt->error);
-            header("Location: error1.php");
-            exit();
-        }
-        $stmt->close();
-    } else {
-        // Redirect to error page if passwords don't match
-        header("Location: error1.php");
-        exit();
-    }
+          // Decrypt gender for session storage
+          $_SESSION['gender'] = $gender;
+          $_SESSION['contact'] = $contact;
+          $_SESSION['email'] = $email;
+
+          // Get the patient ID of the newly registered patient
+          $pid_query = "SELECT pid FROM patreg WHERE email = ? LIMIT 1";
+          $pid_stmt = $con->prepare($pid_query);
+          $pid_stmt->bind_param("s", $encryptedEmail['data']);
+          $pid_stmt->execute();
+          $pid_stmt->bind_result($pid);
+          $pid_stmt->fetch();
+          $_SESSION['pid'] = $pid;
+          $pid_stmt->close();
+
+          // Redirect to admin panel with success message
+          echo "<script>
+              alert('Patient registered successfully!');
+              window.location.href = 'admin-panel.php';
+          </script>";
+          exit();
+      } else {
+          // Log error and redirect to error page
+          error_log("Error inserting data: " . $stmt->error);
+          header("Location: error1.php");
+          exit();
+      }
+      $stmt->close();
+  } else {
+      // Redirect to error page if passwords don't match
+      header("Location: error1.php");
+      exit();
+  }
 }
+
+
 if(isset($_POST['update_data']))
 {
 	$contact=$_POST['contact'];

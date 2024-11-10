@@ -3,69 +3,128 @@
 include('func.php');  
 include('newfunc.php');
 include('session_tracking.php');
-$con=mysqli_connect("localhost","root","","myhmsdb");
+require __DIR__ . '/vendor/autoload.php';
 
+use Dotenv\Dotenv;
 
-  $pid = $_SESSION['pid'];
-  $username = $_SESSION['username'];
-  $email = $_SESSION['email'];
-  $fname = $_SESSION['fname'];
-  $gender = $_SESSION['gender'];
-  $lname = $_SESSION['lname'];
-  $contact = $_SESSION['contact'];
+// load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
-
-
-if(isset($_POST['app-submit']))
-{
-  $pid = $_SESSION['pid'];
-  $username = $_SESSION['username'];
-  $email = $_SESSION['email'];
-  $fname = $_SESSION['fname'];
-  $lname = $_SESSION['lname'];
-  $gender = $_SESSION['gender'];
-  $contact = $_SESSION['contact'];
-  $doctor=$_POST['doctor'];
-  $email=$_SESSION['email'];
-  # $fees=$_POST['fees'];
-  $docFees=$_POST['docFees'];
-
-  $appdate=$_POST['appdate'];
-  $apptime=$_POST['apptime'];
-  $cur_date = date("Y-m-d");
-  date_default_timezone_set('Asia/Kolkata');
-  $cur_time = date("H:i:s");
-  $apptime1 = strtotime($apptime);
-  $appdate1 = strtotime($appdate);
-	
-  if(date("Y-m-d",$appdate1)>=$cur_date){
-    if((date("Y-m-d",$appdate1)==$cur_date and date("H:i:s",$apptime1)>$cur_time) or date("Y-m-d",$appdate1)>$cur_date) {
-      $check_query = mysqli_query($con,"select apptime from appointmenttb where doctor='$doctor' and appdate='$appdate' and apptime='$apptime'");
-
-        if(mysqli_num_rows($check_query)==0){
-          $query=mysqli_query($con,"insert into appointmenttb(pid,fname,lname,gender,email,contact,doctor,docFees,appdate,apptime,userStatus,doctorStatus) values($pid,'$fname','$lname','$gender','$email','$contact','$doctor','$docFees','$appdate','$apptime','1','1')");
-
-          if($query)
-          {
-            echo "<script>alert('Your appointment successfully booked');</script>";
-          }
-          else{
-            echo "<script>alert('Unable to process your request. Please try again!');</script>";
-          }
-      }
-      else{
-        echo "<script>alert('We are sorry to inform that the doctor is not available in this time or date. Please choose different time or date!');</script>";
-      }
-    }
-    else{
-      echo "<script>alert('Select a time or date in the future!');</script>";
-    }
-  }
-  else{
-      echo "<script>alert('Select a time or date in the future!');</script>";
-  }
-  
+$con = mysqli_connect("localhost", "root", "", "myhmsdb");
+if (!$con) {
+    die("Connection failed: " . mysqli_connect_error());
 }
+
+function encryptData($data) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+  $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+  return [
+      'data' => $encrypted,
+      'iv' => base64_encode($iv) 
+  ];
+}
+
+
+if (!function_exists('decryptData')) {
+    function decryptData($encryptedData, $iv) {
+        $encryptionKey = $_ENV['ENCRYPTION_KEY'];
+        $cipherMethod = $_ENV['CIPHER_METHOD'];
+
+        $decodedIV = base64_decode($iv);
+        return openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+    }
+}
+
+
+
+  $pid = $_SESSION['pid'];
+  $username = $_SESSION['username'];
+  $email = $_SESSION['email'];
+  $fname = $_SESSION['fname'];
+  $gender = $_SESSION['gender'];
+  $lname = $_SESSION['lname'];
+  $contact = $_SESSION['contact'];
+
+  if (isset($_POST['app-submit'])) {
+    $pid = $_SESSION['pid'];
+
+    // Get inputs
+    $doctor = $_POST['doctor']; // Use directly, no encryption needed
+    $docFees = $_POST['docFees'];
+    $appdate = $_POST['appdate'];
+    $apptime = $_POST['apptime'];
+    $cur_date = date("Y-m-d");
+    date_default_timezone_set('Asia/Kolkata');
+    $cur_time = date("H:i:s");
+    $apptime1 = strtotime($apptime);
+    $appdate1 = strtotime($appdate);
+
+    // Encrypt only necessary session variables and inputs
+    $encryptedGender = encryptData($_SESSION['gender']);
+    $encryptedEmail = encryptData($_SESSION['email']);
+    $encryptedContact = encryptData($_SESSION['contact']);
+    $encryptedDocFees = encryptData($docFees);
+    $encryptedAppDate = encryptData($appdate);
+    $encryptedAppTime = encryptData($apptime);
+
+    if (date("Y-m-d", $appdate1) >= $cur_date) {
+        if (
+            (date("Y-m-d", $appdate1) == $cur_date && date("H:i:s", $apptime1) > $cur_time) ||
+            date("Y-m-d", $appdate1) > $cur_date
+        ) {
+            $check_query = mysqli_query(
+                $con,
+                "SELECT apptime FROM appointmenttb WHERE doctor='$doctor' AND appdate='$appdate' AND apptime='$apptime'"
+            );
+
+            if (mysqli_num_rows($check_query) == 0) {
+                $query = mysqli_query($con, "INSERT INTO appointmenttb (
+                    pid,
+                    fname,
+                    lname,
+                    gender, gender_iv,
+                    email, email_iv,
+                    contact, contact_iv,
+                    doctor,
+                    docFees, docFees_iv,
+                    appdate, appdate_iv,
+                    apptime, apptime_iv,
+                    userStatus,
+                    doctorStatus
+                ) VALUES (
+                    $pid,
+                    '{$_SESSION['fname']}',
+                    '{$_SESSION['lname']}',
+                    '{$encryptedGender['data']}', '{$encryptedGender['iv']}',
+                    '{$encryptedEmail['data']}', '{$encryptedEmail['iv']}',
+                    '{$encryptedContact['data']}', '{$encryptedContact['iv']}',
+                    '$doctor',
+                    '{$encryptedDocFees['data']}', '{$encryptedDocFees['iv']}',
+                    '{$encryptedAppDate['data']}', '{$encryptedAppDate['iv']}',
+                    '{$encryptedAppTime['data']}', '{$encryptedAppTime['iv']}',
+                    '1',
+                    '1'
+                )");
+
+                if ($query) {
+                    echo "<script>alert('Your appointment successfully booked');</script>";
+                } else {
+                    echo "<script>alert('Unable to process your request. Please try again!');</script>";
+                }
+            } else {
+                echo "<script>alert('We are sorry to inform that the doctor is not available in this time or date. Please choose a different time or date!');</script>";
+            }
+        } else {
+            echo "<script>alert('Select a time or date in the future!');</script>";
+        }
+    } else {
+        echo "<script>alert('Select a time or date in the future!');</script>";
+    }
+}
+
 
 if(isset($_GET['cancel']))
   {
@@ -308,18 +367,30 @@ function get_specs(){
               <form class="form-group" method="post" action="admin-panel.php">
                 <div class="row">
                   
-                  <!-- <?php
+                <?php
+                  $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+                  if (!$con) {
+                      die("Connection failed: " . mysqli_connect_error());
+                  }
 
-                        $con=mysqli_connect("localhost","root","","myhmsdb");
-                        $query=mysqli_query($con,"select username,spec from doctb");
-                        $docarray = array();
-                          while($row =mysqli_fetch_assoc($query))
-                          {
-                              $docarray[] = $row;
-                          }
-                          echo json_encode($docarray);
+                  $query = mysqli_query($con, "SELECT doc_id, username, spec, docFees, doc_Fees_iv, spec_iv FROM doctb");
+                  $docarray = [];
 
-                  ?> -->
+                  while ($row = mysqli_fetch_assoc($query)) {
+                      // Decrypt docFees
+                      $decryptedDocFees = decryptData($row['docFees'], $row['doc_Fees_iv']);
+                      $decryptedSpec = decryptData($row['spec'], $row['spec_iv']);
+                      // Add the decrypted docFees to the row
+                      $row['docFees'] = $decryptedDocFees;
+                      $row['spec'] = $decryptedSpec;
+                     
+                      // Append the modified row to the array for further use (if needed)
+                      $docarray[] = $row;
+                  }
+
+                  
+                  //echo json_encode($docarray);
+                  ?>
         
 
                     <div class="col-md-4">
@@ -363,10 +434,12 @@ function get_specs(){
 
 
                         <script>
-              document.getElementById('doctor').onchange = function updateFees(e) {
-                var selection = document.querySelector(`[value=${this.value}]`).getAttribute('data-value');
-                document.getElementById('docFees').value = selection;
-              };
+             document.getElementById('doctor').onchange = function () {
+              // Retrieve the selected doctor's fee from the data-value attribute
+              let selection = document.querySelector(`[value="${this.value}"]`).getAttribute('data-value');
+              document.getElementById('docFees').value = selection; // Set the decrypted fee value
+          };
+
             </script>
 
                   
@@ -414,13 +487,11 @@ function get_specs(){
 
 
                   
-                  <div class="col-md-4"><label for="consultancyfees">
-                                Consultancy Fees
-                              </label></div>
-                              <div class="col-md-8">
-                              <!-- <div id="docFees">Select a doctor</div> -->
-                              <input class="form-control" type="text" name="docFees" id="docFees" readonly="readonly"/>
-                  </div><br><br>
+                <div class="col-md-4"><label for="consultancyfees">Consultancy Fees</label></div>
+                  <div class="col-md-8">
+                      <input class="form-control" type="text" name="docFees" id="docFees" readonly="readonly"/>
+                  </div>
+                  <br><br>
 
                   <div class="col-md-4"><label>Appointment Date</label></div>
                   <div class="col-md-8"><input type="date" class="form-control datepicker" name="appdate"></div><br><br>
@@ -450,77 +521,81 @@ function get_specs(){
         </div><br>
       </div>
       
-<div class="tab-pane fade" id="app-hist" role="tabpanel" aria-labelledby="list-pat-list">
-        
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    
-                    <th scope="col">Doctor Name</th>
-                    <th scope="col">Consultancy Fees</th>
-                    <th scope="col">Appointment Date</th>
-                    <th scope="col">Appointment Time</th>
-                    <th scope="col">Current Status</th>
-                    <th scope="col">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
+      <div class="tab-pane fade" id="app-hist" role="tabpanel" aria-labelledby="list-pat-list">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Doctor Name</th>
+                <th scope="col">Consultancy Fees</th>
+                <th scope="col">Appointment Date</th>
+                <th scope="col">Appointment Time</th>
+                <th scope="col">Current Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+            if (!$con) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
+            // Query to fetch appointments for the specific patient
+            $query = "SELECT 
+            a.ID, 
+            d.username AS doctorName, 
+            a.docFees, a.docFees_iv, 
+            a.appdate, a.appdate_iv, 
+            a.apptime, a.apptime_iv, 
+            a.userStatus, a.doctorStatus 
+          FROM appointmenttb a
+          JOIN doctb d ON a.doctor = d.doc_id
+          WHERE a.fname = ? AND a.lname = ?";
+            $stmt = $con->prepare($query);
+            $stmt->bind_param("ss", $_SESSION['fname'], $_SESSION['lname']);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-                    $query = "select ID,doctor,docFees,appdate,apptime,userStatus,doctorStatus from appointmenttb where fname ='$fname' and lname='$lname';";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-              
-                      #$fname = $row['fname'];
-                      #$lname = $row['lname'];
-                      #$email = $row['email'];
-                      #$contact = $row['contact'];
-                  ?>
-                      <tr>
-                        <td><?php echo $row['doctor'];?></td>
-                        <td><?php echo $row['docFees'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        
-                          <td>
-                    <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                    {
-                      echo "Active";
-                    }
-                    if(($row['userStatus']==0) && ($row['doctorStatus']==1))  
-                    {
-                      echo "Cancelled by You";
-                    }
+            while ($row = $result->fetch_assoc()) {
+                // Decrypt necessary fields
+                $decryptedDocFees = decryptData($row['docFees'], $row['docFees_iv']);
+                $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+            ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['doctorName']); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedDocFees); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
+                    <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
+                    <td>
+                        <?php 
+                        if (($row['userStatus'] == 1) && ($row['doctorStatus'] == 1)) {
+                            echo "Active";
+                        } elseif (($row['userStatus'] == 0) && ($row['doctorStatus'] == 1)) {
+                            echo "Cancelled by You";
+                        } elseif (($row['userStatus'] == 1) && ($row['doctorStatus'] == 0)) {
+                            echo "Cancelled by Doctor";
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <?php if (($row['userStatus'] == 1) && ($row['doctorStatus'] == 1)) { ?>
+                            <a href="admin-panel.php?ID=<?php echo $row['ID']; ?>&cancel=update" 
+                              onClick="return confirm('Are you sure you want to cancel this appointment?')" 
+                              title="Cancel Appointment" tooltip-placement="top" tooltip="Remove">
+                              <button class="btn btn-danger">Cancel</button>
+                            </a>
+                        <?php } else {
+                            echo "Cancelled";
+                        } ?>
+                    </td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+    <br>
+</div>
 
-                    if(($row['userStatus']==1) && ($row['doctorStatus']==0))  
-                    {
-                      echo "Cancelled by Doctor";
-                    }
-                        ?></td>
-
-                        <td>
-                        <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                        { ?>
-
-													
-	                        <a href="admin-panel.php?ID=<?php echo $row['ID']?>&cancel=update" 
-                              onClick="return confirm('Are you sure you want to cancel this appointment ?')"
-                              title="Cancel Appointment" tooltip-placement="top" tooltip="Remove"><button class="btn btn-danger">Cancel</button></a>
-	                        <?php } else {
-
-                                echo "Cancelled";
-                                } ?>
-                        
-                        </td>
-                      </tr>
-                    <?php } ?>
-                </tbody>
-              </table>
-        <br>
-      </div>
 
 
 
@@ -546,24 +621,39 @@ function get_specs(){
                     $con=mysqli_connect("localhost","root","","myhmsdb");
                     global $con;
 
-                    $query = "select doctor,ID,appdate,apptime,disease,allergy,prescription from prestb where pid='$pid';";
-                    
-                    $result = mysqli_query($con,$query);
-                    if(!$result){
+                    $query = "SELECT 
+                    p.doctor,
+                    p.ID,
+                    a.appdate, a.appdate_iv, 
+                    a.apptime, a.apptime_iv, 
+                    p.disease, p.disease_iv, 
+                    p.allergy, p.allergy_iv, 
+                    p.prescription, p.prescription_iv 
+                  FROM prestb p
+                  JOIN appointmenttb a ON p.ID = a.ID
+                  WHERE p.pid = '$pid';";
+    
+                  $result = mysqli_query($con, $query);
+                  if (!$result) {
                       echo mysqli_error($con);
-                    }
-                    
-
-                    while ($row = mysqli_fetch_array($result)){
+                  }
+              
+                  while ($row = mysqli_fetch_array($result)) {
+               
+                      $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                      $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+                      $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
+                      $decryptedAllergy = decryptData($row['allergy'], $row['allergy_iv']);
+                      $decryptedPrescription = decryptData($row['prescription'], $row['prescription_iv']);
                   ?>
                       <tr>
-                        <td><?php echo $row['doctor'];?></td>
-                        <td><?php echo $row['ID'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td><?php echo $row['disease'];?></td>
-                        <td><?php echo $row['allergy'];?></td>
-                        <td><?php echo $row['prescription'];?></td>
+                          <td><?php echo htmlspecialchars($row['doctor']); ?></td>
+                          <td><?php echo htmlspecialchars($row['ID']); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedDisease); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
+                          <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                         <td>
                           <form method="get">
                           <!-- <a href="admin-panel.php?ID=" 
@@ -586,7 +676,7 @@ function get_specs(){
               </table>
         <br>
       </div>
-
+             
 
 
 

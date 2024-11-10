@@ -1,59 +1,92 @@
 <?php
 session_start();
-$con = mysqli_connect("localhost", "root", "", "myhmsdb");
+require __DIR__ . '/vendor/autoload.php';
 
-if (mysqli_connect_errno()) {
+use Dotenv\Dotenv;
+
+// load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$con = mysqli_connect("localhost", "root", "", "myhmsdb");
+if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+function decryptData($encryptedData, $iv) {
+  $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+  $cipherMethod = $_ENV['CIPHER_METHOD']; 
+
+  $decodedIV = base64_decode($iv);
+
+  // decrypt the data
+  $decrypted = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+
+  return $decrypted; 
+}
+
+
+
 if (isset($_POST['patsub'])) {
   $email = $_POST['email'];
-  $password = $_POST['password2']; // Plain-text password entered by the user
+  $password = $_POST['password2']; 
 
-  // Escape input to prevent SQL injection
   $email = mysqli_real_escape_string($con, $email);
 
-  // SQL query to check if email exists
-  $query = "SELECT * FROM patreg WHERE email='$email'";
+  // check if the email exists
+  $query = "SELECT * FROM patreg";
   $result = mysqli_query($con, $query);
 
   if (!$result) {
       die("Error: " . mysqli_error($con));
   }
 
-  if (mysqli_num_rows($result) == 1) {
-      $row = mysqli_fetch_assoc($result);
+  $isEmailValid = false; // if email matches
+  $row = null; 
+
+  // decrypt and match the email
+  while ($record = mysqli_fetch_assoc($result)) {
+      $decryptedEmail = decryptData($record['email'], $record['email_iv']);
+
+      if ($decryptedEmail === $email) {
+          $isEmailValid = true;
+          $row = $record; 
+          break; 
+      }
+  }
+
+  if ($isEmailValid) {
       $stored_hashed_password = $row['password'];
 
-      // Debug output
       echo "Entered Password: $password<br>";
       echo "Stored Hashed Password: $stored_hashed_password<br>";
 
-      // Test password verification
       if (password_verify($password, $stored_hashed_password)) {
-        // Password matches, set session variables
-        $_SESSION['pid'] = $row['pid'];
-        $_SESSION['username'] = $row['fname'] . " " . $row['lname'];
-        $_SESSION['fname'] = $row['fname'];
-        $_SESSION['lname'] = $row['lname'];
-        $_SESSION['gender'] = $row['gender'];
-        $_SESSION['contact'] = $row['contact'];
-        $_SESSION['email'] = $row['email'];
+          // password matches, set session variables
+          $_SESSION['pid'] = $row['pid'];
+          $_SESSION['username'] = $row['fname'] . " " . $row['lname'];
+          $_SESSION['fname'] = $row['fname'];
+          $_SESSION['lname'] = $row['lname'];
+          $_SESSION['gender'] = decryptData($row['gender'], $row['gender_iv']); 
+          $_SESSION['contact'] = decryptData($row['contact'], $row['contact_iv']); 
+          $_SESSION['email'] = $email;
 
-        $_SESSION['start_time'] = time(); // Current timestamp
-        $_SESSION['expiration_time'] = 120; // Expiration time in seconds
-        $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
+          $_SESSION['start_time'] = time(); // current time
+          $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
+          $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
-    
-        // Redirect to admin panel
-        header("Location: admin-panel.php");
-        exit();
-    } else {
-        // Incorrect password
-        echo "<script>alert('Invalid Password. Try Again!'); window.location.href = 'index1.php';</script>";
-    }
-    
-}
+          header("Location: admin-panel.php");
+          exit();
+      } else {
+          // Incorrect password
+          echo "<script>alert('Invalid Password. Try Again!'); window.location.href = 'index1.php';</script>";
+      }
+  } else {
+      // email not found
+      echo "<script>alert('Email not found. Try Again!'); window.location.href = 'index1.php';</script>";
+  }
+
+
 
 
 
