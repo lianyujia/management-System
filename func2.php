@@ -51,8 +51,8 @@ if (isset($_POST['patsub1'])) {
 
       // Prepare and execute the query
       $stmt = $con->prepare(
-          "INSERT INTO patreg (fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv, password) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO patreg (fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv, password, csrf_token) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
       );
 
       // Bind parameters with appropriate type string

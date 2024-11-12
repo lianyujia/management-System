@@ -75,6 +75,17 @@ if (isset($_POST['patsub'])) {
           $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
           $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
+          $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+          $csrf_token = $_SESSION['csrf_token'];
+
+          // Use pid for updating csrf_token
+          $update_query = "UPDATE patreg SET csrf_token='$csrf_token' WHERE pid=?";
+          $update_stmt = $con->prepare($update_query);
+          $update_stmt->bind_param("i", $row['pid']);
+          $update_stmt->execute();
+          $update_stmt->close();
+
           header("Location: admin-panel.php");
           exit();
       } else {

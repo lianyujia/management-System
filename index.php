@@ -13,6 +13,7 @@
 			border-radius: 0.75rem;
 		}
 	</style>
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script> <!-- reCAPTCHA API -->
 	<script>
 		function checkPasswordRequirements() {
 			const password = document.getElementById("password").value;
@@ -200,6 +201,10 @@
 									<div class="form-group">
 										<input type="password" class="form-control" placeholder="Password *" id="password" name="password" onkeyup="checkPasswordRequirements(); checkPasswordMatch();" minlength="6" required/>
 										<span id="passwordError" style="color: red;"></span>
+									</div>
+									<div class="form-group">
+										<div class="g-recaptcha" data-sitekey="6LeMs3kqAAAAAOadGAZwyxRbWyzpn0-E8AtapfGJ"></div>
+										<span id="captchaError" style="color: red; display: block; margin-top: 10px;"></span> <!-- reCAPTCHA error message -->
 									</div>
 									<div class="form-group">
 										<div class="maxl">

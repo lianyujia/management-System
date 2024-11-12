@@ -78,29 +78,31 @@ if (
   $encryptedPrescription = encryptData($prescription);
 
   // Insert into database with encrypted values
+  // Corrected INSERT query
   $query = mysqli_query($con, "INSERT INTO prestb (
-      doctor,
-      pid,
-      ID,
-      fname, fname_iv,
-      lname, lname_iv,
-      appdate,
-      apptime,
-      disease, disease_iv,
-      allergy, allergy_iv,
-      prescription, prescription_iv
-  ) VALUES (
-      '$doctor',
-      '$pid',
-      '$ID',
-      '{$encryptedFname['data']}', '{$encryptedFname['iv']}',
-      '{$encryptedLname['data']}', '{$encryptedLname['iv']}',
-      '$appdate',
-      '$apptime',      
-      '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
-      '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
-      '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}'
-  )");
+        doctor,
+        pid,
+        ID,
+        fname, fname_iv,
+        lname, lname_iv,
+        appdate, apptime,
+        disease, disease_iv,
+        allergy, allergy_iv,
+        prescription, prescription_iv,
+        appdate_iv, apptime_iv
+    ) VALUES (
+        '$doctor',
+        '$pid',
+        '$ID',
+        '{$encryptedFname['data']}', '{$encryptedFname['iv']}',
+        '{$encryptedLname['data']}', '{$encryptedLname['iv']}',
+        '$appdate', '$apptime',
+        '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
+        '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
+        '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}',
+        '$appdate', '$apptime'
+    )");
+
 
   if ($query) {
       echo "<script>alert('Prescribed successfully!');</script>";

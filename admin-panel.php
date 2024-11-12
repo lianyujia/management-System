@@ -16,6 +16,35 @@ if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+$_SESSION['database_csrf_token'] = null;
+
+
+if ($_SESSION['database_csrf_token'] == null) {
+    $pid = $_SESSION['pid']; // or use $_SESSION['pid'] or any other identifier
+    
+    // Step 2: Query the database to get the CSRF token associated with the user
+    $query = "SELECT csrf_token FROM patreg WHERE pid='$pid'";
+    $result = mysqli_query($con, $query);
+
+    if ($result && mysqli_num_rows($result) == 1) {
+        // Step 3: Fetch the CSRF token from the database
+        $row = mysqli_fetch_assoc($result);
+        $_SESSION['database_csrf_token'] = $row['csrf_token'];
+
+        // Step 4: Compare the CSRF token from the form, session, and database
+        if ($_SESSION['database_csrf_token'] !== $_SESSION['csrf_token']) {
+            // Tokens do not match, redirect to the error page
+            header("Location: csrf_error.php");
+            exit();
+        }
+    } else {
+        // If no CSRF token is found in the database, redirect to the error page
+        header("Location: csrf_error.php");
+        exit();
+    }
+}
+
+
 function encryptData($data) {
   $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
   $cipherMethod = $_ENV['CIPHER_METHOD']; 
@@ -29,13 +58,25 @@ function encryptData($data) {
 
 
 if (!function_exists('decryptData')) {
-    function decryptData($encryptedData, $iv) {
-        $encryptionKey = $_ENV['ENCRYPTION_KEY'];
-        $cipherMethod = $_ENV['CIPHER_METHOD'];
+  function decryptData($encryptedData, $iv) {
+      $encryptionKey = getenv('ENCRYPTION_KEY');
+      $cipherMethod = getenv('CIPHER_METHOD');
+      
+      // Decode the IV and check its length
+      $decodedIV = base64_decode($iv);
+      if (strlen($decodedIV) !== openssl_cipher_iv_length($cipherMethod)) {
+          error_log("Decryption error: IV length is incorrect.");
+          return null;
+      }
 
-        $decodedIV = base64_decode($iv);
-        return openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
-    }
+      // Perform decryption
+      $decryptedData = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
+      if ($decryptedData === false) {
+          error_log("Decryption error: Unable to decrypt data.");
+      }
+
+      return $decryptedData;
+  }
 }
 
 
@@ -139,65 +180,68 @@ if(isset($_GET['cancel']))
 
 
 
-function generate_bill(){
-  $con=mysqli_connect("localhost","root","","myhmsdb");
-  $pid = $_SESSION['pid'];
-  $output='';
-  $query=mysqli_query($con,"select p.pid,p.ID,p.fname,p.lname,p.doctor,p.appdate,p.apptime,p.disease,p.allergy,p.prescription,a.docFees from prestb p inner join appointmenttb a on p.ID=a.ID and p.pid = '$pid' and p.ID = '".$_GET['ID']."'");
-  while($row = mysqli_fetch_array($query)){
-    $output .= '
-    <label> Patient ID : </label>'.$row["pid"].'<br/><br/>
-    <label> Appointment ID : </label>'.$row["ID"].'<br/><br/>
-    <label> Patient Name : </label>'.$row["fname"].' '.$row["lname"].'<br/><br/>
-    <label> Doctor Name : </label>'.$row["doctor"].'<br/><br/>
-    <label> Appointment Date : </label>'.$row["appdate"].'<br/><br/>
-    <label> Appointment Time : </label>'.$row["apptime"].'<br/><br/>
-    <label> Disease : </label>'.$row["disease"].'<br/><br/>
-    <label> Allergies : </label>'.$row["allergy"].'<br/><br/>
-    <label> Prescription : </label>'.$row["prescription"].'<br/><br/>
-    <label> Fees Paid : </label>'.$row["docFees"].'<br/>
-    
-    ';
+  function generate_bill(){
+    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+    $pid = $_SESSION['pid'];
+    $output = '';
+    if (isset($_SESSION['ID'])) {
+        $id = $_SESSION['ID'];
+        $query = mysqli_query($con, "SELECT p.pid, p.ID, p.fname, p.lname, p.doctor, p.appdate, p.apptime, p.disease, p.allergy, p.prescription, a.docFees FROM prestb p INNER JOIN appointmenttb a ON p.ID = a.ID WHERE p.pid = '$pid' AND p.ID = '$id'");
+        
+        while($row = mysqli_fetch_array($query)){
 
+            $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
+
+            $output .= '
+                <label> Patient ID : </label>' . htmlspecialchars($row["pid"]) . '<br/><br/>
+                <label> Appointment ID : </label>' . htmlspecialchars($row["ID"]) . '<br/><br/>
+                <label> Patient Name : </label>' . htmlspecialchars($row["fname"] . ' ' . $row["lname"]) . '<br/><br/>
+                <label> Doctor Name : </label>' . htmlspecialchars($row["doctor"]) . '<br/><br/>
+                <label> Appointment Date : </label>' . htmlspecialchars($row["appdate"]) . '<br/><br/>
+                <label> Appointment Time : </label>' . htmlspecialchars($row["apptime"]) . '<br/><br/>
+                <label> Disease : </label>' . htmlspecialchars($decryptedDisease) . '<br/><br/>
+                <label> Allergies : </label>' . htmlspecialchars($row["allergy"]) . '<br/><br/>
+                <label> Prescription : </label>' . htmlspecialchars($row["prescription"]) . '<br/><br/>
+                <label> Fees Paid : </label>' . htmlspecialchars($row["docFees"]) . '<br/>
+            ';
+        }
+    }
+
+    $_SESSION['ID'] = null;
+    return $output;
   }
   
-  return $output;
-}
 
 
-if(isset($_GET["generate_bill"])){
-  require_once("TCPDF/tcpdf.php");
-  $obj_pdf = new TCPDF('P',PDF_UNIT,PDF_PAGE_FORMAT,true,'UTF-8',false);
-  $obj_pdf -> SetCreator(PDF_CREATOR);
-  $obj_pdf -> SetTitle("Generate Bill");
-  $obj_pdf -> SetHeaderData('','',PDF_HEADER_TITLE,PDF_HEADER_STRING);
-  $obj_pdf -> SetHeaderFont(Array(PDF_FONT_NAME_MAIN,'',PDF_FONT_SIZE_MAIN));
-  $obj_pdf -> SetFooterFont(Array(PDF_FONT_NAME_MAIN,'',PDF_FONT_SIZE_MAIN));
-  $obj_pdf -> SetDefaultMonospacedFont('helvetica');
-  $obj_pdf -> SetFooterMargin(PDF_MARGIN_FOOTER);
-  $obj_pdf -> SetMargins(PDF_MARGIN_LEFT,'5',PDF_MARGIN_RIGHT);
-  $obj_pdf -> SetPrintHeader(false);
-  $obj_pdf -> SetPrintFooter(false);
-  $obj_pdf -> SetAutoPageBreak(TRUE, 10);
-  $obj_pdf -> SetFont('helvetica','',12);
-  $obj_pdf -> AddPage();
+  if (isset($_GET["generate_bill"])) {
+    require_once("TCPDF/tcpdf.php");
+    $obj_pdf = new TCPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    $obj_pdf->SetCreator(PDF_CREATOR);
+    $obj_pdf->SetTitle("Generate Bill");
+    $obj_pdf->SetHeaderData('', '', PDF_HEADER_TITLE, PDF_HEADER_STRING);
+    $obj_pdf->SetHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    $obj_pdf->SetFooterFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    $obj_pdf->SetDefaultMonospacedFont('helvetica');
+    $obj_pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+    $obj_pdf->SetMargins(PDF_MARGIN_LEFT, '5', PDF_MARGIN_RIGHT);
+    $obj_pdf->SetPrintHeader(false);
+    $obj_pdf->SetPrintFooter(false);
+    $obj_pdf->SetAutoPageBreak(TRUE, 10);
+    $obj_pdf->SetFont('helvetica', '', 12);
+    $obj_pdf->AddPage();
+  
+    $content = '';
+    $content .= '
+        <br/>
+        <h2 align="center"> Global Hospitals</h2><br/>
+        <h3 align="center"> Bill</h3>
+    ';
+    $content .= generate_bill();
 
-  $content = '';
-
-  $content .= '
-      <br/>
-      <h2 align ="center"> Global Hospitals</h2></br>
-      <h3 align ="center"> Bill</h3>
-      
-
-  ';
- 
-  $content .= generate_bill();
-  $obj_pdf -> writeHTML($content);
-  ob_end_clean();
-  $obj_pdf -> Output("bill.pdf",'I');
-
-}
+    $obj_pdf->writeHTML($content);
+    ob_end_clean();
+    $obj_pdf->Output("bill.pdf", 'I');
+  }
 
 function get_specs(){
   $con=mysqli_connect("localhost","root","","myhmsdb");
@@ -639,6 +683,7 @@ function get_specs(){
                   }
               
                   while ($row = mysqli_fetch_array($result)) {
+                      $_SESSION['ID'] = $row['ID'];
                
                       $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
                       $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
@@ -655,18 +700,12 @@ function get_specs(){
                           <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
                           <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                         <td>
-                          <form method="get">
-                          <!-- <a href="admin-panel.php?ID=" 
-                              onClick=""
-                              title="Pay Bill" tooltip-placement="top" tooltip="Remove"><button class="btn btn-success">Pay</button>
-                              </a></td> -->
+                        <form method="get" action="payment-details.php">
+                          <td>
+                          <button type="button" onclick="openPaymentModal()" class="btn btn-success">Pay Bill</button>
+                        </td>
+                      </form>
 
-                              <a href="admin-panel.php?ID=<?php echo $row['ID']?>">
-                              <input type ="hidden" name="ID" value="<?php echo $row['ID']?>"/>
-                              <input type = "submit" onclick="alert('Bill Paid Successfully');" name ="generate_bill" class = "btn btn-success" value="Pay Bill"/>
-                              </a>
-                              </td>
-                              </form>
 
                     
                       </tr>
@@ -693,6 +732,32 @@ function get_specs(){
     </div>
   </div>
 </div>
+
+<div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Enter Payment Details</h2>
+    <form id="paymentForm" method="get" action="admin-panel.php">
+      <label>Credit Card Number:</label>
+      <input type="text" name="credit_card" placeholder="1234 5678 9101 1121" /><br/><br/>
+      <label>Expiry Date:</label>
+      <input type="text" name="expiry" placeholder="MM/YY" /><br/><br/>
+      <label>CVV:</label>
+      <input type="text" name="cvv" placeholder="123" /><br/><br/>
+      <input type ="hidden" name="ID" value="<?php echo $_SESSION['ID']; ?>" />
+      <input type="hidden" name="generate_bill" value="true" />
+      <button type="submit" onclick="alert('Bill Paid Successfully');" class="btn btn-success">Pay Bill</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal Styling -->
+<style>
+  .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+  .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; text-align: center; }
+  .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+</style>
    </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -701,6 +766,31 @@ function get_specs(){
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.10.1/sweetalert2.all.min.js">
    </script>
+   <script>
+  // Open the modal
+  function openPaymentModal() {
+  document.getElementById("paymentModal").style.display = "block";
+}
+
+function closePaymentModal() {
+  document.getElementById("paymentModal").style.display = "none";
+}
+
+// Trigger modal close when clicking outside the modal
+window.onclick = function(event) {
+  const modal = document.getElementById("paymentModal");
+  if (event.target === modal) {
+    closePaymentModal();
+  }
+}
+  // When the user clicks "Pay" in the modal
+  function payBill() {
+    alert("Bill Paid Successfully");
+    closePaymentModal();
+  }
+
+  document.querySelector(".close").onclick = closePaymentModal;
+</script>
 
 
 

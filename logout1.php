@@ -1,5 +1,8 @@
 <?php
 session_start();
+
+$_SESSION['csrf_tokenn'] = NULL;
+
 session_destroy();
 ?>
 <!DOCTYPE html>

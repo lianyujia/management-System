@@ -31,6 +31,13 @@ if (isset($_POST['docsub1'])) {
         $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
         $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
+                // Generate a new CSRF token and store it in the session
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+        $csrf_token = $_SESSION['csrf_token'];
+        $update_query = "UPDATE doctb SET csrf_token='$csrf_token' WHERE doc_id='$doc_id';";
+        mysqli_query($con, $update_query);
+
         header("Location:doctor-panel.php");
     } else {
         // Password did not match for any entry

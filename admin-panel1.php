@@ -15,6 +15,34 @@ use PHPMailer\PHPMailer\Exception;
 
 $mail = new PHPMailer(true);
 
+$_SESSION['database_csrf_token'] = NULL;
+
+if ($_SESSION['database_csrf_token'] != NULL) {
+  $username = $_SESSION['username']; // or use $_SESSION['pid'] or any other identifier
+  
+  // Step 2: Query the database to get the CSRF token associated with the user
+  $query = "SELECT csrf_token FROM admintb WHERE username='$username'";
+  $result = mysqli_query($con, $query);
+
+  if ($result && mysqli_num_rows($result) == 1) {
+      // Step 3: Fetch the CSRF token from the database
+      $row = mysqli_fetch_assoc($result);
+      $_SESSION['database_csrf_token'] = $row['csrf_token'];
+
+      // Step 4: Compare the CSRF token from the form, session, and database
+      if ($_SESSION['database_csrf_token'] !== $_SESSION['csrf_token']) {
+          // Tokens do not match, redirect to the error page
+          header("Location: csrf_error.php");
+          exit();
+      }
+  } else {
+      // If no CSRF token is found in the database, redirect to the error page
+      header("Location: csrf_error.php");
+      exit();
+  }
+}
+
+
 function encryptData($data) {
   $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
   $cipherMethod = $_ENV['CIPHER_METHOD']; 
@@ -90,7 +118,7 @@ if (isset($_POST['docsub'])) {
           $mail->Body = "Hello $doctor,\n\nYour doctor account has been created successfully.\nYour login credentials are:\nUsername: $doctor\nPassword: $randomPassword\n\nPlease change your password after logging in.";
       
           $mail->send();
-          echo "<script>alert('An email with login credentials has been sent to the doctor.');</script>";
+          echo "<script>alert('Password: {$randomPassword} An email with login credentials has been sent to the doctor.');</script>";
       } catch (Exception $e) {
           echo "<script>alert('Error sending email: {$mail->ErrorInfo}');</script>";
       }

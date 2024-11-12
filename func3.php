@@ -13,6 +13,14 @@ if(isset($_POST['adsub'])){
         $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
         $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
+		        // Generate and set new CSRF token
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $csrf_token = $_SESSION['csrf_token'];
+        
+        // Update CSRF token in the database
+        $update_query = "UPDATE admintb SET csrf_token='$csrf_token' WHERE username='$username';";
+        mysqli_query($con, $update_query);
+
 		header("Location:admin-panel1.php");
 	}
 	else
