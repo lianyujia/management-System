@@ -98,6 +98,20 @@ if (isset($_POST['docsub'])) {
   if ($result) {
       echo "<script>alert('Doctor added successfully!');</script>";
 
+      $adminUsername = $_SESSION['username'];
+
+      // add activity log
+      $activity = "New doctor added: $doctor with specialization $spec.";
+      $encryptedActivity = encryptData($activity);
+
+      $log_query = "INSERT INTO activity_log (activity, activity_iv, admin, created_on) VALUES 
+                    ('" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "', '$adminUsername', NOW())";
+      $log_result = mysqli_query($con, $log_query);
+
+      if (!$log_result) {
+          echo "<script>alert('Error logging activity.');</script>";
+      }
+
       // send the email
       try {
           $mail = new PHPMailer(true);
@@ -118,7 +132,7 @@ if (isset($_POST['docsub'])) {
           $mail->Body = "Hello $doctor,\n\nYour doctor account has been created successfully.\nYour login credentials are:\nUsername: $doctor\nPassword: $randomPassword\n\nPlease change your password after logging in.";
       
           $mail->send();
-          echo "<script>alert('Password: {$randomPassword} An email with login credentials has been sent to the doctor.');</script>";
+          echo "<script>alert('An email with login credentials has been sent to the doctor.');</script>";
       } catch (Exception $e) {
           echo "<script>alert('Error sending email: {$mail->ErrorInfo}');</script>";
       }
@@ -135,12 +149,23 @@ if(isset($_POST['docsub1']))
   if($result)
     {
       echo "<script>alert('Doctor removed successfully!');</script>";
-  }
-  else{
-    echo "<script>alert('Unable to delete!');</script>";
+      $activity = "Doctor removed: $doctorName";
+      $encryptedActivity = encryptData($activity); 
+
+      date_default_timezone_set('Asia/Kuala_Lumpur'); 
+      $created_on = date('Y-m-d H:i:s'); 
+      $logQuery = "
+          INSERT INTO activity_log (activity, activity_iv, created_on, admin) 
+          VALUES ('{$encryptedActivity['data']}', '{$encryptedActivity['iv']}', '$created_on', '{$_SESSION['username']}')";
+      $logResult = mysqli_query($con, $logQuery);
+
+      if (!$logResult) {
+          echo "<script>alert('Failed to record activity log.');</script>";
+      }
+  } else {
+      echo "<script>alert('Unable to delete!');</script>";
   }
 }
-
 
 ?>
 <html lang="en">
@@ -153,13 +178,17 @@ if(isset($_POST['docsub1']))
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
 
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
   <a class="navbar-brand" href="#"><i class="fa fa-user-plus" aria-hidden="true"></i> Global Hospital </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -216,10 +245,10 @@ if(isset($_POST['docsub1']))
 }
   </style>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
      <ul class="navbar-nav mr-auto">
        <li class="nav-item">
-        <a class="nav-link" href="logout1.php"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a>
+        <a class="nav-link" href="logout1.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
       </li>
        <li class="nav-item">
         <a class="nav-link" href="#"></a>
@@ -235,6 +264,11 @@ if(isset($_POST['docsub1']))
   <body style="padding-top:50px;">
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family: 'IBM Plex Sans', sans-serif;"> WELCOME RECEPTIONIST </h3>
+    <div style="position: absolute; right: 10px; margin-top: -100px;">
+        <button class="btn btn-primary" style="background-color: #313866;" data-toggle="modal" data-target="#activityLogModal">
+            <i class="fas fa-file"></i> History
+        </button>
+    </div>
     <div class="row">
   <div class="col-md-4" style="max-width:25%;margin-top: 3%;">
     <div class="list-group" id="list-tab" role="tablist">
@@ -242,11 +276,10 @@ if(isset($_POST['docsub1']))
       <a class="list-group-item list-group-item-action" href="#list-doc" id="list-doc-list"  role="tab"    aria-controls="home" data-toggle="list">Doctor List</a>
       <a class="list-group-item list-group-item-action" href="#list-pat" id="list-pat-list"  role="tab" data-toggle="list" aria-controls="home">Patient List</a>
       <a class="list-group-item list-group-item-action" href="#list-app" id="list-app-list"  role="tab" data-toggle="list" aria-controls="home">Appointment Details</a>
-      <a class="list-group-item list-group-item-action" href="#list-pres" id="list-pres-list"  role="tab" data-toggle="list" aria-controls="home">Prescription List</a>
       <a class="list-group-item list-group-item-action" href="#list-settings" id="list-adoc-list"  role="tab" data-toggle="list" aria-controls="home">Add Doctor</a>
       <a class="list-group-item list-group-item-action" href="#list-settings1" id="list-ddoc-list"  role="tab" data-toggle="list" aria-controls="home">Delete Doctor</a>
-      <a class="list-group-item list-group-item-action" href="#list-mes" id="list-mes-list"  role="tab" data-toggle="list" aria-controls="home">Queries</a>
-      
+      <a class="list-group-item list-group-item-action" href="#list-insight" id="list-insight-list"  role="tab" data-toggle="list" aria-controls="home">Daily Login Analysis</a>
+      <a class="list-group-item list-group-item-action" href="#list-insight-appt" id="list-insight-appt-list"  role="tab" data-toggle="list" aria-controls="home">Doctor Appointments Analysis</a>
     </div><br>
   </div>
   <div class="col-md-8" style="margin-top: 3%;">
@@ -309,21 +342,7 @@ if(isset($_POST['docsub1']))
                 </div>
 
                 <div class="row">
-                <div class="col-sm-4" style="left: 13%;margin-top: 5%;">
-                  <div class="panel panel-white no-radius text-center">
-                    <div class="panel-body" >
-                      <span class="fa-stack fa-2x"> <i class="fa fa-square fa-stack-2x text-primary"></i> <i class="fa fa-list-ul fa-stack-1x fa-inverse"></i> </span>
-                      <h4 class="StepTitle" style="margin-top: 5%;">Prescription List</h4>
-                    
-                      <p class="cl-effect-1">
-                        <a href="#list-pres" onclick="clickDiv('#list-pres-list')">
-                          View Prescriptions
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+                
 
                 <div class="col-sm-4" style="left: 18%;margin-top: 5%">
                   <div class="panel panel-white no-radius text-center">
@@ -341,33 +360,40 @@ if(isset($_POST['docsub1']))
                     </div>
                   </div>
                 </div>
+
+                <div class="col-sm-4" style="left: 18%;margin-top: 5%">
+                  <div class="panel panel-white no-radius text-center">
+                    <div class="panel-body" >
+                      <span class="fa-stack fa-2x"> <i class="fa fa-square fa-stack-2x text-primary"></i> <i class="fa fa-bar-chart fa-stack-1x fa-inverse"></i> </span>
+                      <h4 class="StepTitle" style="margin-top: 5%;">View Insights</h4>
+                    
+                      <p class="cl-effect-1">
+                        <a href="#app-hist" onclick="clickDiv('#list-insight-list')">View Daily Login</a>
+                        &nbsp|
+                        <a href="#app-hist" onclick="clickDiv('#list-insight-appt-list')">
+                          View Doctor Appointments
+                        </a>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                        
+
+                </div>
+                  
+                
 
       
                 
               </div>
             </div>
-      
-                
-      
 
-
-
-
-
-
-      <div class="tab-pane fade" id="list-doc" role="tabpanel" aria-labelledby="list-home-list">
+    <div class="tab-pane fade" id="list-doc" role="tabpanel" aria-labelledby="list-home-list">
               
 
-              <div class="col-md-8">
-      <form class="form-group" action="doctorsearch.php" method="post">
-        <div class="row">
-        <div class="col-md-10"><input type="text" name="doctor_contact" placeholder="Enter Email ID" class = "form-control"></div>
-        <div class="col-md-2"><input type="submit" name="doctor_search_submit" class="btn btn-primary" value="Search"></div></div>
-      </form>
+    <div class="col-md-8">
+        <input type="text" id="filterDoctorInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterDoctorTable()">
     </div>
-            <table class="table table-hover">
+            <table class="table table-hover" id="doctorTable" style="margin-top: 20px;">
             <thead>
                 <tr>
                     <th scope="col">Doctor Name</th>
@@ -410,198 +436,129 @@ if(isset($_POST['docsub1']))
 
     <div class="tab-pane fade" id="list-pat" role="tabpanel" aria-labelledby="list-pat-list">
 
-       <div class="col-md-8">
-      <form class="form-group" action="patientsearch.php" method="post">
-        <div class="row">
-        <div class="col-md-10"><input type="text" name="patient_contact" placeholder="Enter Contact" class = "form-control"></div>
-        <div class="col-md-2"><input type="submit" name="patient_search_submit" class="btn btn-primary" value="Search"></div></div>
-      </form>
+    <div class="col-md-8">
+        <input type="text" id="filterPatientInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPatientTable()">
     </div>
-        
-            <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">Patient ID</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Gender</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Contact</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $con = mysqli_connect("localhost", "root", "", "myhmsdb");
-                if (!$con) {
-                    die("Connection failed: " . mysqli_connect_error());
-                }
+          <table class="table table-hover" id="patientTable" style="margin-top: 20px;">
+          <thead>
+              <tr>
+                  <th scope="col">Patient ID</th>
+                  <th scope="col">First Name</th>
+                  <th scope="col">Last Name</th>
+                  <th scope="col">Gender</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Contact</th>
+              </tr>
+          </thead>
+          <tbody>
+              <?php 
+              $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+              if (!$con) {
+                  die("Connection failed: " . mysqli_connect_error());
+              }
 
-                $query = "SELECT pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv FROM patreg";
-                $result = mysqli_query($con, $query);
+              $query = "SELECT pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv FROM patreg";
+              $result = mysqli_query($con, $query);
 
-                while ($row = mysqli_fetch_array($result)) {
-                    // Decrypt the necessary fields
-                    $pid = $row['pid'];
-                    $fname = $row['fname'];
-                    $lname = $row['lname'];
-                    $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
-                    $decryptedEmail = decryptData($row['email'], $row['email_iv']);
-                    $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
-              
+              while ($row = mysqli_fetch_array($result)) {
+                  // Decrypt the necessary fields
+                  $pid = $row['pid'];
+                  $fname = $row['fname'];
+                  $lname = $row['lname'];
+                  $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
+                  $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                  $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
+            
 
-                    echo "<tr>
-                        <td>$pid</td>
-                        <td>$fname</td>
-                        <td>$lname</td>
-                        <td>$decryptedGender</td>
-                        <td>$decryptedEmail</td>
-                        <td>$decryptedContact</td>
-                     
-                    </tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+                  echo "<tr>
+                      <td>$pid</td>
+                      <td>$fname</td>
+                      <td>$lname</td>
+                      <td>$decryptedGender</td>
+                      <td>$decryptedEmail</td>
+                      <td>$decryptedContact</td>
+                    
+                  </tr>";
+              }
+              ?>
+          </tbody>
+      </table>
 
         <br>
       </div>
-
-
-      <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
-
-       <div class="col-md-8">
-  
-        <div class="row">
-        
-    
-        
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                  <th scope="col">Doctor</th>
-                    <th scope="col">Patient ID</th>
-                    <th scope="col">Appointment ID</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Appointment Date</th>
-                    <th scope="col">Appointment Time</th>
-                    <th scope="col">Disease</th>
-                    <th scope="col">Allergy</th>
-                    <th scope="col">Prescription</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-                    $query = "select * from prestb";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                      $doctor = $row['doctor'];
-                      $pid = $row['pid'];
-                      $ID = $row['ID'];
-                      $fname = $row['fname'];
-                      $lname = $row['lname'];
-                      $appdate = $row['appdate'];
-                      $apptime = $row['apptime'];
-                      $disease = $row['disease'];
-                      $allergy = $row['allergy'];
-                      $pres = $row['prescription'];
-
-                      
-                      echo "<tr>
-                        <td>$doctor</td>
-                        <td>$pid</td>
-                        <td>$ID</td>
-                        <td>$fname</td>
-                        <td>$lname</td>
-                        <td>$appdate</td>
-                        <td>$apptime</td>
-                        <td>$disease</td>
-                        <td>$allergy</td>
-                        <td>$pres</td>
-                      </tr>";
-                    }
-
-                  ?>
-                </tbody>
-              </table>
-        <br>
-      </div>
-      </div>
-      </div>
-
-
-
 
       <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
 
-         <div class="col-md-8">
-      <form class="form-group" action="appsearch.php" method="post">
-        <div class="row">
-        <div class="col-md-10"><input type="text" name="app_contact" placeholder="Enter Contact" class = "form-control"></div>
-        <div class="col-md-2"><input type="submit" name="app_search_submit" class="btn btn-primary" value="Search"></div></div>
-      </form>
-    </div>
-        
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                  <th scope="col">Appointment ID</th>
-                  <th scope="col">Patient ID</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Gender</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Contact</th>
-                    <th scope="col">Doctor Name</th>
-                    <th scope="col">Consultancy Fees</th>
-                    <th scope="col">Appointment Date</th>
-                    <th scope="col">Appointment Time</th>
-                    <th scope="col">Appointment Status</th>
-                  </tr>
-                </thead>
-                <tbody>
+      <div class="col-md-8">
+          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()">
+      </div>
+
+          <table class="table table-hover" id="appointmentTable" style="margin-top: 20px;">
+            <thead>
+            <tr>
+              <th scope="col">Appointment ID</th>
+              <th scope="col">Patient ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Email</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Doctor Name</th>
+                <th scope="col">Consultancy Fees</th>
+                <th scope="col">Appointment Date</th>
+                <th scope="col">Appointment Time</th>
+                <th scope="col">Appointment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php 
+
+                $con=mysqli_connect("localhost","root","","myhmsdb");
+                global $con;
+
+                $query = "SELECT a.*, d.username AS doctor_username 
+                FROM appointmenttb a
+                LEFT JOIN doctb d ON a.doctor = d.doc_id 
+                ORDER BY STR_TO_DATE(a.appdate, '%Y-%m-%d') DESC;";
+                $result = mysqli_query($con,$query);
+                while ($row = mysqli_fetch_array($result)) {
+
+                  // Decrypt data fields
+                  $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
+                  $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                  $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
+                  $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                  $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+                  $decryptedFee = decryptData($row['docFees'], $row['docFees_iv']);
+            ?>
+              <tr>
+                <td><?php echo $row['ID']; ?></td>
+                <td><?php echo $row['pid']; ?></td>
+                <td><?php echo $row['fname']; ?></td>
+                <td><?php echo $row['lname']; ?></td>
+                <td><?php echo $decryptedGender; ?></td>
+                <td><?php echo $decryptedEmail; ?></td>
+                <td><?php echo $decryptedContact; ?></td>
+                <td><?php echo $row['doctor_username']; ?></td> 
+                <td><?php echo $decryptedDocFees; ?></td>
+                <td><?php echo $decryptedAppDate; ?></td>
+                <td><?php echo $decryptedAppTime; ?></td>
+                <td>
                   <?php 
-
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-
-                    $query = "select * from appointmenttb;";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                  ?>
-                      <tr>
-                        <td><?php echo $row['ID'];?></td>
-                        <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['gender'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['doctor'];?></td>
-                        <td><?php echo $row['docFees'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td>
-                    <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                    {
+                    // Display appointment status
+                    if (($row['userStatus'] == 1) && ($row['doctorStatus'] == 1)) {
                       echo "Active";
-                    }
-                    if(($row['userStatus']==0) && ($row['doctorStatus']==1))  
-                    {
+                    } elseif (($row['userStatus'] == 0) && ($row['doctorStatus'] == 1)) {
                       echo "Cancelled by Patient";
-                    }
-
-                    if(($row['userStatus']==1) && ($row['doctorStatus']==0))  
-                    {
+                    } elseif (($row['userStatus'] == 1) && ($row['doctorStatus'] == 0)) {
                       echo "Cancelled by Doctor";
                     }
-                        ?></td>
-                      </tr>
-                    <?php } ?>
-                </tbody>
-              </table>
+                  ?>
+                </td>
+              </tr>
+            <?php } ?>
+          </tbody>
+          </table>
         <br>
       </div>
 
@@ -644,62 +601,507 @@ if(isset($_POST['docsub1']))
         </form>
       </div>
 
+      <div class="tab-pane fade" id="list-insight" role="tabpanel" aria-labelledby="list-insight-list">
 
-       <div class="tab-pane fade" id="list-attend" role="tabpanel" aria-labelledby="list-attend-list">...</div>
-
-       <div class="tab-pane fade" id="list-mes" role="tabpanel" aria-labelledby="list-mes-list">
-
-         <div class="col-md-8">
-      <form class="form-group" action="messearch.php" method="post">
-        <div class="row">
-        <div class="col-md-10"><input type="text" name="mes_contact" placeholder="Enter Contact" class = "form-control"></div>
-        <div class="col-md-2"><input type="submit" name="mes_search_submit" class="btn btn-primary" value="Search"></div></div>
-      </form>
-    </div>
-        
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th scope="col">User Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Contact</th>
-                    <th scope="col">Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
-
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-
-                    $query = "select * from contact;";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)) {
-                      // decrypt fields
-                      $decryptedEmail = decryptData($row['email'], $row['email_iv']);
-                      $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
-                      $decryptedMessage = decryptData($row['message'], $row['message_iv']);
-                  ?>
-                      <tr>
-                          <td><?php echo htmlspecialchars($row['name']); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedEmail); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedContact); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedMessage); ?></td>
-                      </tr>
-                  <?php } ?>
-                </tbody>
-              </table>
+      <h3>Daily Login Time Analysis</h3>
+        <div class="form-group">
+            <label for="datePicker">Select Date:</label>
+            <input type="date" id="datePicker" class="form-control" onchange="fetchLoginsByDate()">
+        </div>
+        <div id="chartContainer">
+            <canvas id="dailyChart"></canvas>
+            
+        </div>
+        <br>
+        <h5 id="averageDuration"></h3>
         <br>
       </div>
 
+      <div class="tab-pane fade" id="list-insight-appt" role="tabpanel" aria-labelledby="list-insight-appt-list">
 
+        <h3>Appointment Analysis</h3>
+        <div class="form-group">
+            <label for="datePicker2">Select Date:</label>
+            <input type="date" id="datePicker2" class="form-control" onchange="fetchAppointmentByDate()">
+        </div>
+        <div class="form-group">
+            <label for="doctorSelect">Select Doctor:</label>
+            <select id="doctorSelect" class="form-control" onchange="fetchAppointmentsByDoctor()">
+                <option value="">All Doctors</option>
+               
+            </select>
+        </div>
+        <div id="chartContainer2">
+            <canvas id="apptChart"></canvas>
+        </div>
+        <br>
+        
+        <br>
+    </div>
 
     </div>
   </div>
 </div>
    </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+   <div class="modal fade" id="activityLogModal" tabindex="-1" role="dialog" aria-labelledby="activityLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityLogModalLabel">Activity Log</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Filter Dropdown -->
+                <div class="form-group">
+                    <label for="filter">Filter Activity Log By:</label>
+                    <select id="filter" class="form-control" onchange="filterLog()">
+                        <option value="patient_doctor">Patient/Doctor</option>
+                        <option value="admin">Admin</option>
+                        <option value="login_logout">Login/Logout</option>
+                    </select>
+                </div>
+
+                <!-- Activity Log Table -->
+                <div id="activityLogTable">
+                    <?php
+                    $query = mysqli_query($con, "
+                        SELECT 
+                            a.activity, 
+                            a.activity_iv, 
+                            a.created_on, 
+                            a.admin, 
+                            a.login, 
+                            a.login_iv, 
+                            a.logout, 
+                            a.logout_iv, 
+                            p.fname AS patient_fname, 
+                            p.lname AS patient_lname, 
+                            d.username AS doctor_username
+                        FROM activity_log a
+                        LEFT JOIN patreg p ON a.pid = p.pid
+                        LEFT JOIN doctb d ON a.doc_id = d.doc_id
+                        ORDER BY a.created_on DESC
+                    ");
+
+                    if (mysqli_num_rows($query) > 0) {
+                        echo "<table class='table table-bordered'>
+                                <thead>
+                                    <tr id='table-headers'></tr>
+                                </thead>
+                                <tbody id='table-body'>";
+                        while ($row = mysqli_fetch_assoc($query)) {
+                            $decryptedActivity = decryptData($row['activity'], $row['activity_iv']);
+                            $decryptedLogin = !empty($row['login']) ? decryptData($row['login'], $row['login_iv']) : null;
+                            $decryptedLogout = !empty($row['logout']) ? decryptData($row['logout'], $row['logout_iv']) : null;
+                            $patientName = !empty($row['patient_fname']) ? "{$row['patient_fname']} {$row['patient_lname']}" : null;
+                            $doctorName = !empty($row['doctor_username']) ? $row['doctor_username'] : null;
+                            $adminName = !empty($row['admin']) ? $row['admin'] : null;
+
+                            echo "<tr class='log-row' data-category='" . getLogCategory($row) . "'>
+                                    <td class='activity'>{$decryptedActivity}</td>
+                                    <td class='patient'>" . ($patientName ?: '') . "</td>
+                                    <td class='doctor'>" . ($doctorName ?: '') . "</td>
+                                    <td class='admin'>" . ($adminName ?: '') . "</td>
+                                    <td class='login'>" . ($decryptedLogin ?: '') . "</td>
+                                    <td class='logout'>" . ($decryptedLogout ?: '') . "</td>
+                                    <td class='created_on'>{$row['created_on']}</td>
+                                  </tr>";
+                        }
+                        echo "</tbody>
+                              </table>";
+                    } else {
+                        echo "<p>No activity log found.</p>";
+                    }
+
+                    function getLogCategory($row) {
+                        if (!empty($row['admin']) && empty($row['login']) && empty($row['logout'])) {
+                            return 'admin';
+                        } elseif (!empty($row['login']) || !empty($row['logout'])) {
+                            return 'login_logout';
+                        } else {
+                            return 'patient_doctor';
+                        }
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   let dailyChart; 
+
+    function fetchLoginsByDate() {
+        const selectedDate = document.getElementById('datePicker').value;
+
+        if (!selectedDate) {
+            alert('Please select a date.');
+            return;
+        }
+
+        // fetch data from the server
+        fetch(`fetch_login.php?date=${selectedDate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.recordCount === 0) {
+                    // no record found
+                    document.getElementById('chartContainer').innerHTML = `
+                        <p>No records for the selected date (${selectedDate}).</p>
+                    `;
+          
+                    const averageDurationElement = document.getElementById('averageDuration');
+                    if (averageDurationElement) {
+                        averageDurationElement.innerHTML = '';
+                    }
+
+                    if (dailyChart) {
+                        dailyChart.destroy(); // destroy the previous chart 
+                    }
+                } else {
+                    // reset the chart container
+                    document.getElementById('chartContainer').innerHTML = `
+                        <canvas id="dailyChart"></canvas>
+                    `;
+
+                    const ctx = document.getElementById('dailyChart').getContext('2d');
+                    const hourlyLogins = data.hourlyLogins;
+                    const averageDuration = data.averageDuration;
+
+                    if (dailyChart) {
+                        dailyChart.destroy();
+                    }
+
+                    // create a new chart 
+                    dailyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // 24-hour labels
+                            datasets: [{
+                                label: 'Login Count',
+                                data: hourlyLogins,
+                                borderColor: '#1D267D',
+                                fill: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `Login Count for ${selectedDate}`
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Hour of the Day'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Login Count'
+                                    },
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+
+                    // show average
+                    const averageDurationElement = document.getElementById('averageDuration');
+                    if (averageDurationElement) {
+                        averageDurationElement.innerHTML = 
+                            `Average Duration Spent: <strong>${averageDuration} minutes</strong>`;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                alert('An error occurred while fetching data.');
+            });
+    }
+
+    let apptChart; 
+
+    function formatDateToDDMMYYYY(date) {
+      const [year, month, day] = date.split('-'); // YYYY-MM-DD
+      return `${day}/${month}/${year}`; 
+    }
+
+    function fetchAppointmentByDate() {
+    const selectedDate = document.getElementById('datePicker2').value;
+
+    if (!selectedDate) {
+        alert('Please select a date.');
+        return;
+    }
+
+    const formattedDate = formatDateToDDMMYYYY(selectedDate);
+
+    // fetch total appointments for the date
+    fetch(`fetch_appointment.php?date=${formattedDate}`)
+        .then(response => response.json())
+        .then(data => {
+            const chartContainer2 = document.getElementById('chartContainer2');
+
+            if (data.recordCount === 0) {
+                chartContainer2.innerHTML = `<p>No appointments for the selected date.</p>`;
+                updateDoctorDropdown([]); // disable dropdown if no appointments
+                return;
+            }
+
+            const canvasContainer = document.getElementById('chartContainer2');
+            canvasContainer.innerHTML = '<canvas id="apptChart"></canvas>'; 
+            const ctx = document.getElementById('apptChart').getContext('2d');
+
+            if (apptChart) {
+                apptChart.destroy();
+            }
+
+            apptChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Hours
+                    datasets: [{
+                        label: 'Total Appointments',
+                        data: data.hourlyAppointments,
+                        borderColor: '#7776B3',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Appointments Analysis for ${formattedDate}`
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour of the Day'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Appointments Count'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching appointment data:', error);
+            alert('An error occurred while fetching data.');
+        });
+
+    // fetch doctors for the selected date and update the dropdown
+    fetch(`fetch_appointment.php?date=${formattedDate}&fetchDoctors=true`)
+        .then(response => response.json())
+        .then(data => {
+            updateDoctorDropdown(data.doctors || []);
+        })
+        .catch(error => {
+            console.error('Error fetching doctors:', error);
+            alert('An error occurred while fetching doctors.');
+        });
+}
+
+
+function fetchAppointmentsByDoctor() {
+    const selectedDate = document.getElementById('datePicker2').value;
+    const doctorSelect = document.getElementById('doctorSelect');
+    const selectedDoctorId = doctorSelect.value; 
+
+    if (!selectedDate || !selectedDoctorId) {
+        alert('Please select both a date and a doctor.');
+        return;
+    }
+
+    const formattedDate = formatDateToDDMMYYYY(selectedDate);
+
+    // keep the selected doctor as the active option
+    Array.from(doctorSelect.options).forEach(option => {
+        if (option.value === selectedDoctorId) {
+            option.selected = true;
+        }
+    });
+
+    // fetch doctor data and overlay it on the graph
+    fetch(`fetch_appointment.php?date=${formattedDate}&doctor=${selectedDoctorId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.recordCount === 0) {
+                alert(`No appointments for Doctor ${doctorSelect.selectedOptions[0].text} on this date.`);
+                return;
+            }
+
+            // add the doctor's data as a new dataset to the current chart
+            const doctorDataset = {
+                label: `Appointments for Doctor ${doctorSelect.selectedOptions[0].text}`,
+                data: data.doctorAppointments, // hourly data for the selected doctor
+                borderColor: 'green', 
+                pointBackgroundColor: 'red', 
+                fill: true, 
+            };
+
+      
+            if (apptChart) {
+                apptChart.data.datasets.push(doctorDataset); 
+                apptChart.update(); 
+            } else {
+                console.error('Chart instance not found. Please ensure the main chart is created before adding a doctor-specific line.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching doctor-specific data:', error);
+            alert('An error occurred while fetching data.');
+        });
+}
+
+
+function updateDoctorDropdown(doctors) {
+    const doctorSelect = document.getElementById('doctorSelect');
+    doctorSelect.innerHTML = '<option value="">View by Doctor</option>';
+
+    if (doctors.length > 0) {
+        doctors.forEach(doctor => {
+            const option = document.createElement('option');
+            option.value = doctor.doc_id; 
+            option.textContent = doctor.username; // display doctor username
+            doctorSelect.appendChild(option);
+        });
+
+        doctorSelect.disabled = false;
+    } else {
+        doctorSelect.disabled = true;
+    }
+}
+
+
+    function filterLog() {
+        const filter = document.getElementById('filter').value;
+        const rows = document.querySelectorAll('.log-row');
+        const headers = document.getElementById('table-headers');
+        const visibleColumns = {
+            'patient_doctor': ['activity', 'patient', 'doctor', 'created_on'],
+            'admin': ['activity', 'created_on'],
+            'login_logout': ['activity', 'patient', 'doctor', 'admin', 'login', 'logout']
+        };
+
+        headers.innerHTML = '';
+        visibleColumns[filter].forEach(column => {
+            headers.innerHTML += `<th class="${column}">${column.replace('_', ' ').toUpperCase()}</th>`;
+        });
+
+        rows.forEach(row => {
+            const category = row.getAttribute('data-category');
+            row.style.display = category === filter ? '' : 'none';
+            row.querySelectorAll('td').forEach(td => {
+                td.style.display = visibleColumns[filter].includes(td.className) ? '' : 'none';
+            });
+        });
+    }
+
+    window.onload = () => {
+     
+        document.getElementById('filter').value = 'patient_doctor';
+        filterLog();
+    };
+
+    function filterAppointmentTable() {
+        // get the value entered 
+        const filter = document.getElementById("filterInput").value.toUpperCase();
+        const table = document.getElementById("appointmentTable");
+        const rows = table.getElementsByTagName("tr");
+
+        // loop through table rows and hide rows that don't match the filter
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+            
+            // loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+            
+            // show the row if a match is found
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+
+    function filterPatientTable() {
+        // get the value entered 
+        const filter = document.getElementById("filterPatientInput").value.toUpperCase();
+        const table = document.getElementById("patientTable");
+        const rows = table.getElementsByTagName("tr");
+
+        // loop through table rows and hide rows that don't match the filter
+        for (let i = 1; i < rows.length; i++) { 
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+
+            // loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            // show the row if a match is found
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+
+    function filterDoctorTable() {
+        // get the value entered 
+        const filter = document.getElementById("filterDoctorInput").value.toUpperCase();
+        const table = document.getElementById("doctorTable");
+        const rows = table.getElementsByTagName("tr");
+
+        // loop through table rows and hide rows that don't match the filter
+        for (let i = 1; i < rows.length; i++) { 
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+
+            // loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            // show the row if a match is found
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+</script>
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>

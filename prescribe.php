@@ -68,7 +68,8 @@ if (
   $pid = $_POST['pid'];
   $ID = $_POST['ID'];
   $prescription = $_POST['prescription'];
-  $doctor = $_SESSION['dname']; // Assuming doctor is stored in session
+  $doctor = $_SESSION['dname']; 
+  $doc_id = $_SESSION['doc_id'];
 
   // Encrypt sensitive fields
   $encryptedFname = encryptData($fname);
@@ -78,37 +79,47 @@ if (
   $encryptedPrescription = encryptData($prescription);
 
   // Insert into database with encrypted values
-  // Corrected INSERT query
   $query = mysqli_query($con, "INSERT INTO prestb (
-        doctor,
-        pid,
-        ID,
-        fname, fname_iv,
-        lname, lname_iv,
-        appdate, apptime,
-        disease, disease_iv,
-        allergy, allergy_iv,
-        prescription, prescription_iv,
-        appdate_iv, apptime_iv
-    ) VALUES (
-        '$doctor',
-        '$pid',
-        '$ID',
-        '{$encryptedFname['data']}', '{$encryptedFname['iv']}',
-        '{$encryptedLname['data']}', '{$encryptedLname['iv']}',
-        '$appdate', '$apptime',
-        '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
-        '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
-        '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}',
-        '$appdate', '$apptime'
-    )");
+      doctor,
+      pid,
+      ID,
+      fname, fname_iv,
+      lname, lname_iv,
+      appdate,
+      apptime,
+      disease, disease_iv,
+      allergy, allergy_iv,
+      prescription, prescription_iv
+  ) VALUES (
+      '$doctor',
+      '$pid',
+      '$ID',
+      '{$encryptedFname['data']}', '{$encryptedFname['iv']}',
+      '{$encryptedLname['data']}', '{$encryptedLname['iv']}',
+      '$appdate',
+      '$apptime',      
+      '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
+      '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
+      '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}'
+  )");
 
+if ($query) {
+  // add activity log
+  $activity = "Prescription added for patient: $fname $lname (ID: $pid) by Dr. $doctor.";
+  $encryptedActivity = encryptData($activity);
 
-  if ($query) {
-      echo "<script>alert('Prescribed successfully!');</script>";
+  $log_query = "INSERT INTO activity_log (activity, activity_iv, pid, doc_id) VALUES 
+                ('" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "', '$pid', '$doc_id')";
+  $log_result = mysqli_query($con, $log_query);
+
+  if (!$log_result) {
+      echo "<script>alert('Prescription saved but failed to log activity.');</script>";
   } else {
-      echo "<script>alert('Unable to process your request. Try again!');</script>";
+      echo "<script>alert('Prescribed successfully!');</script>";
   }
+} else {
+  echo "<script>alert('Unable to process your request. Try again!');</script>";
+}
 
 
 

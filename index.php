@@ -8,6 +8,14 @@
 	<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
 	<link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+	<!-- jQuery and Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
 	<style>
 		.form-control {
 			border-radius: 0.75rem;
@@ -218,6 +226,7 @@
 											</label>
 										</div>
 										<a href="index1.php">Already have an account?</a>
+										<a href="javascript:void(0);" onclick="openResetPasswordModal()">Forgot Password?</a>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -231,8 +240,10 @@
 										<input type="password" class="form-control" id="cpassword" placeholder="Confirm Password *" name="cpassword" onkeyup="checkPasswordMatch();" required />
 										<span id="message"></span>
 									</div>
-									<input type="submit" class="btnRegister" name="patsub1" value="Register"/>
+									<input type="submit" class="btnRegister" name="patsub1" value="Register" style="margin-top: 120px; margin-left: 50px;"/>
+									
 								</div>
+								
 							</div>
 						</form>
 					</div>
@@ -288,9 +299,38 @@
                 </div>
 
             </div>
-    </body>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="resetPasswordForm" method="post" action="reset-password.php">
+                    <div class="form-group">
+                        <label for="email">Enter your registered email:</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="example@example.com" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send OTP</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openResetPasswordModal() {
+    $('#resetPasswordModal').modal('show');
+}
+
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
@@ -301,5 +341,7 @@
 			</div>
 		</div>
 	</div>
+
+	
 </body>
 </html>

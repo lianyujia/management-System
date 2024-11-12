@@ -13,6 +13,19 @@ if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+if (!function_exists('encryptData')) {
+  function encryptData($data) {
+    $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+    $cipherMethod = $_ENV['CIPHER_METHOD']; 
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+    $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+    return [
+        'data' => $encrypted,
+        'iv' => base64_encode($iv) 
+    ];
+  }
+}
+
 function decryptData($encryptedData, $iv) {
   $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
   $cipherMethod = $_ENV['CIPHER_METHOD']; 
@@ -86,8 +99,39 @@ if (isset($_POST['patsub'])) {
           $update_stmt->execute();
           $update_stmt->close();
 
+          // insert into activity log
+          $pid = $_SESSION['pid'];
+          date_default_timezone_set('Asia/Kuala_Lumpur'); 
+          $loginTime = date('Y-m-d H:i:s'); 
+
+          // encrypt activity and login time
+          $activity = "Patient logged in";
+          $encryptedActivity = encryptData($activity);
+          $encryptedLoginTime = encryptData($loginTime);
+
+          $logQuery = "
+              INSERT INTO activity_log (
+                  activity, activity_iv, 
+                  pid, 
+                  login, login_iv, 
+                  created_on
+              ) VALUES (
+                  '" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "',
+                  '$pid',
+                  '" . $encryptedLoginTime['data'] . "', '" . $encryptedLoginTime['iv'] . "',
+                  NOW()
+              )
+          ";
+
+          if (mysqli_query($con, $logQuery)) {
+              echo "Activity logged successfully.";
+          } else {
+              echo "Error logging activity: " . mysqli_error($con);
+          }
+
           header("Location: admin-panel.php");
           exit();
+            
       } else {
           // Incorrect password
           echo "<script>alert('Invalid Password. Try Again!'); window.location.href = 'index1.php';</script>";

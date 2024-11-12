@@ -81,167 +81,253 @@ if (!function_exists('decryptData')) {
 
 
 
+$pid = $_SESSION['pid'];
+$username = $_SESSION['username'];
+$email = $_SESSION['email'];
+$fname = $_SESSION['fname'];
+$gender = $_SESSION['gender'];
+$lname = $_SESSION['lname'];
+$contact = $_SESSION['contact'];
+
+if (isset($_POST['app-submit'])) {
+
+  date_default_timezone_set('Asia/Kolkata');
+
+  // Session variables
   $pid = $_SESSION['pid'];
-  $username = $_SESSION['username'];
-  $email = $_SESSION['email'];
   $fname = $_SESSION['fname'];
-  $gender = $_SESSION['gender'];
   $lname = $_SESSION['lname'];
+  $gender = $_SESSION['gender'];
+  $email = $_SESSION['email'];
   $contact = $_SESSION['contact'];
 
-  if (isset($_POST['app-submit'])) {
-    $pid = $_SESSION['pid'];
+  $doctor = $_POST['doctor'];
+  $docFees = $_POST['docFees'];
+  $appdate = $_POST['appdate'];
+  $apptime = $_POST['apptime'];
 
-    // Get inputs
-    $doctor = $_POST['doctor']; // Use directly, no encryption needed
-    $docFees = $_POST['docFees'];
-    $appdate = $_POST['appdate'];
-    $apptime = $_POST['apptime'];
-    $cur_date = date("Y-m-d");
-    date_default_timezone_set('Asia/Kolkata');
-    $cur_time = date("H:i:s");
-    $apptime1 = strtotime($apptime);
-    $appdate1 = strtotime($appdate);
+  // current date and time
+  $cur_date = date("Y-m-d");
+  $cur_time = date("H:i:s");
 
-    // Encrypt only necessary session variables and inputs
-    $encryptedGender = encryptData($_SESSION['gender']);
-    $encryptedEmail = encryptData($_SESSION['email']);
-    $encryptedContact = encryptData($_SESSION['contact']);
-    $encryptedDocFees = encryptData($docFees);
-    $encryptedAppDate = encryptData($appdate);
-    $encryptedAppTime = encryptData($apptime);
+  // convert to timestamp for validation
+  $appdate1 = strtotime($appdate);
+  $apptime1 = strtotime($apptime);
 
-    if (date("Y-m-d", $appdate1) >= $cur_date) {
-        if (
-            (date("Y-m-d", $appdate1) == $cur_date && date("H:i:s", $apptime1) > $cur_time) ||
-            date("Y-m-d", $appdate1) > $cur_date
-        ) {
-            $check_query = mysqli_query(
-                $con,
-                "SELECT apptime FROM appointmenttb WHERE doctor='$doctor' AND appdate='$appdate' AND apptime='$apptime'"
-            );
+  $encryptedGender = encryptData($gender);
+  $encryptedEmail = encryptData($email);
+  $encryptedContact = encryptData($contact);
+  $encryptedDocFees = encryptData($docFees);
+  $encryptedAppDate = encryptData($appdate);
+  $encryptedAppTime = encryptData($apptime);
 
-            if (mysqli_num_rows($check_query) == 0) {
-                $query = mysqli_query($con, "INSERT INTO appointmenttb (
-                    pid,
-                    fname,
-                    lname,
-                    gender, gender_iv,
-                    email, email_iv,
-                    contact, contact_iv,
-                    doctor,
-                    docFees, docFees_iv,
-                    appdate, appdate_iv,
-                    apptime, apptime_iv,
-                    userStatus,
-                    doctorStatus
-                ) VALUES (
-                    $pid,
-                    '{$_SESSION['fname']}',
-                    '{$_SESSION['lname']}',
-                    '{$encryptedGender['data']}', '{$encryptedGender['iv']}',
-                    '{$encryptedEmail['data']}', '{$encryptedEmail['iv']}',
-                    '{$encryptedContact['data']}', '{$encryptedContact['iv']}',
-                    '$doctor',
-                    '{$encryptedDocFees['data']}', '{$encryptedDocFees['iv']}',
-                    '{$encryptedAppDate['data']}', '{$encryptedAppDate['iv']}',
-                    '{$encryptedAppTime['data']}', '{$encryptedAppTime['iv']}',
-                    '1',
-                    '1'
-                )");
+  // validate date and time
+  if ($appdate1 >= strtotime($cur_date) && ($appdate1 > strtotime($cur_date) || $apptime1 > strtotime($cur_time))) {
 
-                if ($query) {
-                    echo "<script>alert('Your appointment successfully booked');</script>";
-                } else {
-                    echo "<script>alert('Unable to process your request. Please try again!');</script>";
-                }
-            } else {
-                echo "<script>alert('We are sorry to inform that the doctor is not available in this time or date. Please choose a different time or date!');</script>";
+      // retrieve all appointments for the selected doctor
+      $stmt = $con->prepare(
+          "SELECT appdate, appdate_iv, apptime, apptime_iv FROM appointmenttb WHERE doctor = ?"
+      );
+      $stmt->bind_param("s", $doctor);
+      $stmt->execute();
+      $result = $stmt->get_result();
+
+      $isSlotAvailable = true;
+
+      while ($row = $result->fetch_assoc()) {
+          $dbAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+          $dbAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+
+          if ($dbAppDate === $appdate && $dbAppTime === $apptime) {
+              $isSlotAvailable = false;
+              break;
+          }
+      }
+
+      if ($isSlotAvailable) {
+          $userStatus = 1;
+          $doctorStatus = 1;
+
+          // insert the appointment 
+          $stmt = $con->prepare(
+              "INSERT INTO appointmenttb (
+                  pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv, doctor, 
+                  docFees, docFees_iv, appdate, appdate_iv, apptime, apptime_iv, userStatus, doctorStatus
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          );
+          $stmt->bind_param(
+              "isssssssssssssssss",
+              $pid,
+              $fname,
+              $lname,
+              $encryptedGender['data'],
+              $encryptedGender['iv'],
+              $encryptedEmail['data'],
+              $encryptedEmail['iv'],
+              $encryptedContact['data'],
+              $encryptedContact['iv'],
+              $doctor,
+              $encryptedDocFees['data'],
+              $encryptedDocFees['iv'],
+              $encryptedAppDate['data'],
+              $encryptedAppDate['iv'],
+              $encryptedAppTime['data'],
+              $encryptedAppTime['iv'],
+              $userStatus,
+              $doctorStatus
+          );
+
+          if ($stmt->execute()) {
+            // fetch the doctor's username
+            $stmt = $con->prepare("SELECT username FROM doctb WHERE doc_id = ?");
+            $stmt->bind_param("s", $doctor);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $doctorUsername = ""; 
+            if ($row = $result->fetch_assoc()) {
+                $doctorUsername = $row['username'];
             }
-        } else {
-            echo "<script>alert('Select a time or date in the future!');</script>";
-        }
-    } else {
-        echo "<script>alert('Select a time or date in the future!');</script>";
-    }
+              // log activity
+              $activity = "Appointment booked successfully with Dr. $doctorUsername on $appdate at $apptime";
+              $encryptedActivity = encryptData($activity);
+
+              $stmt = $con->prepare(
+                  "INSERT INTO activity_log (activity, activity_iv, pid, doc_id) VALUES (?, ?, ?, ?)"
+              );
+              $stmt->bind_param(
+                  "ssss",
+                  $encryptedActivity['data'],
+                  $encryptedActivity['iv'],
+                  $pid,
+                  $doctor
+              );
+
+              if ($stmt->execute()) {
+                  echo "<script>alert('Your appointment has been successfully booked!');</script>";
+              } else {
+                  echo "<script>alert('Appointment booked but failed to log activity. Please contact support.');</script>";
+              }
+          } else {
+              echo "<script>alert('Unable to process your request. Please try again!');</script>";
+          }
+      } else {
+          echo "<script>alert('The doctor is not available at this time or date. Please choose a different time or date!');</script>";
+      }
+  } else {
+      echo "<script>alert('Please select a time or date in the future!');</script>";
+  }
 }
 
 
+
+
 if(isset($_GET['cancel']))
+{
+  $query=mysqli_query($con,"update appointmenttb set userStatus='0' where ID = '".$_GET['ID']."'");
+  if($query)
   {
-    $query=mysqli_query($con,"update appointmenttb set userStatus='0' where ID = '".$_GET['ID']."'");
-    if($query)
-    {
-      echo "<script>alert('Your appointment successfully cancelled');</script>";
-    }
+    echo "<script>alert('Your appointment successfully cancelled');</script>";
+  }
+}
+
+
+function generate_bill($appointmentId) {
+  $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+
+  if (!$con) {
+      die("Connection failed: " . mysqli_connect_error());
   }
 
-
-
-
-
-  function generate_bill(){
-    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
-    $pid = $_SESSION['pid'];
-    $output = '';
-    if (isset($_SESSION['ID'])) {
-        $id = $_SESSION['ID'];
-        $query = mysqli_query($con, "SELECT p.pid, p.ID, p.fname, p.lname, p.doctor, p.appdate, p.apptime, p.disease, p.allergy, p.prescription, a.docFees FROM prestb p INNER JOIN appointmenttb a ON p.ID = a.ID WHERE p.pid = '$pid' AND p.ID = '$id'");
-        
-        while($row = mysqli_fetch_array($query)){
-
-            $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
-
-            $output .= '
-                <label> Patient ID : </label>' . htmlspecialchars($row["pid"]) . '<br/><br/>
-                <label> Appointment ID : </label>' . htmlspecialchars($row["ID"]) . '<br/><br/>
-                <label> Patient Name : </label>' . htmlspecialchars($row["fname"] . ' ' . $row["lname"]) . '<br/><br/>
-                <label> Doctor Name : </label>' . htmlspecialchars($row["doctor"]) . '<br/><br/>
-                <label> Appointment Date : </label>' . htmlspecialchars($row["appdate"]) . '<br/><br/>
-                <label> Appointment Time : </label>' . htmlspecialchars($row["apptime"]) . '<br/><br/>
-                <label> Disease : </label>' . htmlspecialchars($decryptedDisease) . '<br/><br/>
-                <label> Allergies : </label>' . htmlspecialchars($row["allergy"]) . '<br/><br/>
-                <label> Prescription : </label>' . htmlspecialchars($row["prescription"]) . '<br/><br/>
-                <label> Fees Paid : </label>' . htmlspecialchars($row["docFees"]) . '<br/>
-            ';
-        }
-    }
-
-    $_SESSION['ID'] = null;
-    return $output;
+  // Ensure the appointment ID is passed and valid
+  if (!$appointmentId) {
+      echo "Invalid appointment ID.";
+      return;
   }
-  
 
+  // Query to fetch data for the specific appointment ID
+  $query = "
+      SELECT 
+          p.doctor,
+          p.ID,
+          a.appdate, a.appdate_iv,
+          a.apptime, a.apptime_iv,
+          p.disease, p.disease_iv,
+          p.allergy, p.allergy_iv,
+          p.prescription, p.prescription_iv
+      FROM prestb p
+      JOIN appointmenttb a ON p.ID = a.ID
+      WHERE p.ID = '$appointmentId';
+  ";
 
-  if (isset($_GET["generate_bill"])) {
-    require_once("TCPDF/tcpdf.php");
-    $obj_pdf = new TCPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-    $obj_pdf->SetCreator(PDF_CREATOR);
-    $obj_pdf->SetTitle("Generate Bill");
-    $obj_pdf->SetHeaderData('', '', PDF_HEADER_TITLE, PDF_HEADER_STRING);
-    $obj_pdf->SetHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-    $obj_pdf->SetFooterFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-    $obj_pdf->SetDefaultMonospacedFont('helvetica');
-    $obj_pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-    $obj_pdf->SetMargins(PDF_MARGIN_LEFT, '5', PDF_MARGIN_RIGHT);
-    $obj_pdf->SetPrintHeader(false);
-    $obj_pdf->SetPrintFooter(false);
-    $obj_pdf->SetAutoPageBreak(TRUE, 10);
-    $obj_pdf->SetFont('helvetica', '', 12);
-    $obj_pdf->AddPage();
-  
-    $content = '';
-    $content .= '
-        <br/>
-        <h2 align="center"> Global Hospitals</h2><br/>
-        <h3 align="center"> Bill</h3>
-    ';
-    $content .= generate_bill();
+  $result = mysqli_query($con, $query);
 
-    $obj_pdf->writeHTML($content);
-    ob_end_clean();
-    $obj_pdf->Output("bill.pdf", 'I');
+  if (!$result) {
+      echo "Error: " . mysqli_error($con);
+      return;
   }
+
+  $output = '';
+
+  while ($row = mysqli_fetch_array($result)) {
+      $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+      $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+      $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
+      $decryptedAllergy = decryptData($row['allergy'], $row['allergy_iv']);
+      $decryptedPrescription = decryptData($row['prescription'], $row['prescription_iv']);
+
+      $output .= '
+          <label>Patient ID:</label> ' . htmlspecialchars($row['ID']) . '<br/>
+          <label>Doctor:</label> ' . htmlspecialchars($row['doctor']) . '<br/>
+          <label>Appointment Date:</label> ' . htmlspecialchars($decryptedAppDate) . '<br/>
+          <label>Appointment Time:</label> ' . htmlspecialchars($decryptedAppTime) . '<br/>
+          <label>Disease:</label> ' . htmlspecialchars($decryptedDisease) . '<br/>
+          <label>Allergies:</label> ' . htmlspecialchars($decryptedAllergy) . '<br/>
+          <label>Prescription:</label> ' . htmlspecialchars($decryptedPrescription) . '<br/>
+      ';
+  }
+
+  return $output;
+}
+
+
+if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
+  if (!isset($_GET['appointment_id']) || empty($_GET['appointment_id'])) {
+      die("Error: Appointment ID is required to generate the bill.");
+  }
+
+  $appointmentId = $_GET['appointment_id'];
+
+  require_once("TCPDF/tcpdf.php");
+  $obj_pdf = new TCPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+  $obj_pdf->SetCreator(PDF_CREATOR);
+  $obj_pdf->SetTitle("Generate Bill");
+  $obj_pdf->SetHeaderData('', '', PDF_HEADER_TITLE, PDF_HEADER_STRING);
+  $obj_pdf->SetHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+  $obj_pdf->SetFooterFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+  $obj_pdf->SetDefaultMonospacedFont('helvetica');
+  $obj_pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+  $obj_pdf->SetMargins(PDF_MARGIN_LEFT, '5', PDF_MARGIN_RIGHT);
+  $obj_pdf->SetPrintHeader(false);
+  $obj_pdf->SetPrintFooter(false);
+  $obj_pdf->SetAutoPageBreak(TRUE, 10);
+  $obj_pdf->SetFont('helvetica', '', 12);
+  $obj_pdf->AddPage();
+
+  // Fetch content for the specific appointment ID
+  $content = '';
+  $content .= '
+      <br/>
+      <h2 align="center"> Global Hospitals</h2><br/>
+      <h3 align="center"> Bill</h3>
+  ';
+  $content .= generate_bill($appointmentId); // Pass the appointment ID to the function
+
+  $obj_pdf->writeHTML($content);
+  ob_end_clean();
+  $obj_pdf->Output("bill.pdf", 'I');
+}
+
 
 function get_specs(){
   $con=mysqli_connect("localhost","root","","myhmsdb");
@@ -259,28 +345,26 @@ function get_specs(){
   <head>
 
 
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
+  <meta charset="utf-8">
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- Bootstrap CSS -->
     
-        <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
-
-    
-  
-    
-    
-
-
+    <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+     -->
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
   <a class="navbar-brand" href="#"><i class="fa fa-user-plus" aria-hidden="true"></i> Global Hospital </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -310,7 +394,7 @@ function get_specs(){
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
      <ul class="navbar-nav mr-auto">
        <li class="nav-item">
-        <a class="nav-link" href="logout.php"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a>
+        <a class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
       </li>
        <li class="nav-item">
         <a class="nav-link" href="#"></a>
@@ -328,6 +412,11 @@ function get_specs(){
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%;  padding-bottom: 20px; font-family: 'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $username ?> 
    </h3>
+   <div style="position: absolute; right: 10px; margin-top: -100px;">
+        <button class="btn btn-primary" style="background-color: #313866;" data-toggle="modal" data-target="#activityLogModal">
+            <i class="fas fa-file"></i> History
+        </button>
+    </div>
     <div class="row">
   <div class="col-md-4" style="max-width:25%; margin-top: 3%">
     <div class="list-group" id="list-tab" role="tablist">
@@ -338,6 +427,7 @@ function get_specs(){
       
     </div><br>
   </div>
+  
   <div class="col-md-8" style="margin-top: 3%;">
     <div class="tab-content" id="nav-tabContent" style="width: 950px;">
 
@@ -400,9 +490,6 @@ function get_specs(){
           </div>
 
 
-
-
-
       <div class="tab-pane fade" id="list-home" role="tabpanel" aria-labelledby="list-home-list">
         <div class="container-fluid">
           <div class="card">
@@ -421,19 +508,17 @@ function get_specs(){
                   $docarray = [];
 
                   while ($row = mysqli_fetch_assoc($query)) {
-                      // Decrypt docFees
+                      // decrypt docFees
                       $decryptedDocFees = decryptData($row['docFees'], $row['doc_Fees_iv']);
                       $decryptedSpec = decryptData($row['spec'], $row['spec_iv']);
-                      // Add the decrypted docFees to the row
+         
                       $row['docFees'] = $decryptedDocFees;
                       $row['spec'] = $decryptedSpec;
                      
-                      // Append the modified row to the array for further use (if needed)
+           
                       $docarray[] = $row;
                   }
 
-                  
-                  //echo json_encode($docarray);
                   ?>
         
 
@@ -479,58 +564,15 @@ function get_specs(){
 
                         <script>
              document.getElementById('doctor').onchange = function () {
-              // Retrieve the selected doctor's fee from the data-value attribute
+ 
               let selection = document.querySelector(`[value="${this.value}"]`).getAttribute('data-value');
-              document.getElementById('docFees').value = selection; // Set the decrypted fee value
+              document.getElementById('docFees').value = selection; 
           };
 
             </script>
 
                   
-                  
-
-                  
-                        <!-- <div class="col-md-4"><label for="doctor">Doctors:</label></div>
-                                <div class="col-md-8">
-                                    <select name="doctor" class="form-control" id="doctor1" required="required">
-                                      <option value="" disabled selected>Select Doctor</option>
-                                      
-                                    </select>
-                                </div>
-                                <br><br> -->
-
-                                <!-- <script>
-                                  document.getElementById("spec").onchange = function updateSpecs(event) {
-                                      var selected = document.querySelector(`[data-value=${this.value}]`).getAttribute("value");
-                                      console.log(selected);
-
-                                      var options = document.getElementById("doctor1").querySelectorAll("option");
-
-                                      for (i = 0; i < options.length; i++) {
-                                        var currentOption = options[i];
-                                        var category = options[i].getAttribute("data-spec");
-
-                                        if (category == selected) {
-                                          currentOption.style.display = "block";
-                                        } else {
-                                          currentOption.style.display = "none";
-                                        }
-                                      }
-                                    }
-                                </script> -->
-
-                        
-                    <!-- <script>
-                    let data = 
-                
-              document.getElementById('spec').onchange = function updateSpecs(e) {
-                let values = data.filter(obj => obj.spec == this.value).map(o => o.username);   
-                document.getElementById('doctor1').value = document.querySelector(`[value=${values}]`).getAttribute('data-value');
-              };
-            </script> -->
-
-
-                  
+           
                 <div class="col-md-4"><label for="consultancyfees">Consultancy Fees</label></div>
                   <div class="col-md-8">
                       <input class="form-control" type="text" name="docFees" id="docFees" readonly="readonly"/>
@@ -584,7 +626,7 @@ function get_specs(){
                 die("Connection failed: " . mysqli_connect_error());
             }
 
-            // Query to fetch appointments for the specific patient
+            // fetch appointments for the specific patient
             $query = "SELECT 
             a.ID, 
             d.username AS doctorName, 
@@ -601,7 +643,7 @@ function get_specs(){
             $result = $stmt->get_result();
 
             while ($row = $result->fetch_assoc()) {
-                // Decrypt necessary fields
+              
                 $decryptedDocFees = decryptData($row['docFees'], $row['docFees_iv']);
                 $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
                 $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
@@ -639,7 +681,6 @@ function get_specs(){
     </table>
     <br>
 </div>
-
 
 
 
@@ -701,9 +742,10 @@ function get_specs(){
                           <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                         <td>
                         <form method="get" action="payment-details.php">
-                          <td>
-                          <button type="button" onclick="openPaymentModal()" class="btn btn-success">Pay Bill</button>
+                        <td>
+                            <button type="button" onclick="openPaymentModal('<?php echo $row['ID']; ?>')" class="btn btn-success">Pay Bill</button>
                         </td>
+
                       </form>
 
 
@@ -733,57 +775,123 @@ function get_specs(){
   </div>
 </div>
 
-<div id="paymentModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Enter Payment Details</h2>
-    <form id="paymentForm" method="get" action="admin-panel.php">
-      <label>Credit Card Number:</label>
-      <input type="text" name="credit_card" placeholder="1234 5678 9101 1121" /><br/><br/>
-      <label>Expiry Date:</label>
-      <input type="text" name="expiry" placeholder="MM/YY" /><br/><br/>
-      <label>CVV:</label>
-      <input type="text" name="cvv" placeholder="123" /><br/><br/>
-      <input type ="hidden" name="ID" value="<?php echo $_SESSION['ID']; ?>" />
-      <input type="hidden" name="generate_bill" value="true" />
-      <button type="submit" onclick="alert('Bill Paid Successfully');" class="btn btn-success">Pay Bill</button>
-    </form>
-  </div>
+<div class="modal fade" id="activityLogModal" tabindex="-1" role="dialog" aria-labelledby="activityLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityLogModalLabel">History</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php
+                // fetch activity log 
+                $query = mysqli_query(
+                    $con, 
+                    "SELECT * FROM activity_log 
+                     WHERE pid = '{$_SESSION['pid']}' 
+                     AND (login = '' OR login IS NULL) 
+                     ORDER BY created_on DESC"
+                );
+                if (mysqli_num_rows($query) > 0) {
+                    echo "<table class='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>";
+                    while ($row = mysqli_fetch_assoc($query)) {
+                        $decryptedActivity = decryptData($row['activity'], $row['activity_iv']);
+                        echo "<tr>
+                                <td>{$decryptedActivity}</td>
+                                <td>{$row['created_on']}</td>
+                              </tr>";
+                    }
+                    echo "</tbody>
+                          </table>";
+                } else {
+                    echo "<p>No activity log found.</p>";
+                }
+                ?>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Enter Payment Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm" method="get" action="admin-panel.php">
+                    <div class="form-group">
+                        <label for="creditCard">Credit Card Number:</label>
+                        <input type="text" class="form-control" id="creditCard" name="credit_card" placeholder="1234 5678 9101 1121" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date:</label>
+                        <input type="text" class="form-control" id="expiryDate" name="expiry" placeholder="MM/YY" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV:</label>
+                        <input type="text" class="form-control" id="cvv" name="cvv" placeholder="123" required />
+                    </div>
+                    <input type="hidden" id="appointmentId" name="appointment_id" value="" />
+                    <input type="hidden" name="generate_bill" value="true" />
+                    <button type="submit" onclick="alert('Bill Paid Successfully');" class="btn btn-success">Pay Bill</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 <!-- Modal Styling -->
 <style>
-  .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+  /* .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
   .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; text-align: center; }
-  .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+  .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; } */
 </style>
    </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.10.1/sweetalert2.all.min.js">
    </script>
    <script>
-  // Open the modal
-  function openPaymentModal() {
-  document.getElementById("paymentModal").style.display = "block";
+  // open the modal
+  function openPaymentModal(appointmentId) {
+    // Set the appointment ID in the hidden input field
+    document.getElementById('appointmentId').value = appointmentId;
+
+    // Show the modal
+    $('#paymentModal').modal('show');
 }
 
+
+// Close the modal using Bootstrap's modal method
 function closePaymentModal() {
-  document.getElementById("paymentModal").style.display = "none";
+    $('#paymentModal').modal('hide');
 }
 
-// Trigger modal close when clicking outside the modal
+// trigger modal close when clicking outside the modal
 window.onclick = function(event) {
   const modal = document.getElementById("paymentModal");
   if (event.target === modal) {
     closePaymentModal();
   }
 }
-  // When the user clicks "Pay" in the modal
+  // when the user clicks "Pay" in the modal
   function payBill() {
     alert("Bill Paid Successfully");
     closePaymentModal();

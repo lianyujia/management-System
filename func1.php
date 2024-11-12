@@ -1,6 +1,31 @@
 <?php
 session_start();
-$con=mysqli_connect("localhost","root","","myhmsdb");
+require __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+// load .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$con = mysqli_connect("localhost", "root", "", "myhmsdb");
+if (!$con) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+
+if (!function_exists('encryptData')) {
+  function encryptData($data) {
+    $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+    $cipherMethod = $_ENV['CIPHER_METHOD']; 
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
+    $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
+    return [
+        'data' => $encrypted,
+        'iv' => base64_encode($iv) 
+    ];
+  }
+}
+
 if (isset($_POST['docsub1'])) {
   $dname = $_POST['username3'];
   $dpass = $_POST['password3'];
@@ -24,50 +49,63 @@ if (isset($_POST['docsub1'])) {
     }
 
     if ($validDoctor) {
-        // Set session variables
+        // set session variables
         $_SESSION['dname'] = $dname;
         $_SESSION['doc_id'] = $doc_id; 
         $_SESSION['start_time'] = time(); // current time
         $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
         $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
-                // Generate a new CSRF token and store it in the session
+        // generate a new CSRF token and store it in the session
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
         $csrf_token = $_SESSION['csrf_token'];
         $update_query = "UPDATE doctb SET csrf_token='$csrf_token' WHERE doc_id='$doc_id';";
         mysqli_query($con, $update_query);
 
-        header("Location:doctor-panel.php");
+        // insert into activity log
+        date_default_timezone_set('Asia/Kuala_Lumpur'); 
+        $loginTime = date('Y-m-d H:i:s'); 
+        $activity = "Doctor logged in";
+        
+        // encrypt activity and login time
+        $encryptedActivity = encryptData($activity);
+        $encryptedLoginTime = encryptData($loginTime);
+
+        $logQuery = "
+            INSERT INTO activity_log (
+                activity, activity_iv, 
+                doc_id, 
+                login, login_iv, 
+                created_on
+            ) VALUES (
+                '" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "',
+                '$doc_id',
+                '" . $encryptedLoginTime['data'] . "', '" . $encryptedLoginTime['iv'] . "',
+                NOW()
+            )
+        ";
+
+    if (mysqli_query($con, $logQuery)) {
+        // activity logged successfully
+        header("Location: doctor-panel.php");
+        exit();
+    }
     } else {
-        // Password did not match for any entry
+        // password did not match for any entry
         echo "<script>
             alert('Invalid Username or Password.');
             window.location.href = 'index.php';
             </script>";
     }
 } else {
-    // No user found with the username
+    // no user found with the username
     echo "<script>
         alert('Invalid Username or Password.');
         window.location.href = 'index.php';
         </script>";
 }
 }
-
-
-
-// if(isset($_POST['update_data']))  
-//   $result=mysqli_query($con,$query);
-//   if(mysqli_num_rows($result)==1)
-//   {
-//     $_SESSION['username']=$username;
-//     header("Location:admin-panel.php");
-//   }
-//   else
-//     header("Location:error2.php");
-  
-
 
 
 function display_docs()
@@ -82,15 +120,6 @@ function display_docs()
 		echo '<option value="'.$name.'">'.$name.'</option>';
 	}
 }
-
-// if(isset($_POST['doc_sub']))
-// {
-// 	$name=$_POST['name'];
-// 	$query="insert into doctb(name)values('$name')";
-// 	$result=mysqli_query($con,$query);
-// 	if($result)
-// 		header("Location:adddoc.php");
-// }
 
 
 function display_admin_panel(){

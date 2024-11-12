@@ -7,8 +7,6 @@ use Dotenv\Dotenv;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-
-// Load .env file
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -69,21 +67,18 @@ if(isset($_GET['cancel']))
 <html lang="en">
   <head>
 
-
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">   
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
   <a class="navbar-brand" href="#"><i class="fa fa-user-plus" aria-hidden="true"></i> Global Hospital </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -115,7 +110,7 @@ if(isset($_GET['cancel']))
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
      <ul class="navbar-nav mr-auto">
        <li class="nav-item">
-        <a class="nav-link" href="logout1.php"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a>
+        <a class="nav-link" href="logout1.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
       </li>
        <li class="nav-item">
         <a class="nav-link" href="#"></a>
@@ -136,6 +131,11 @@ if(isset($_GET['cancel']))
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family:'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $_SESSION['dname']; ?>, Your ID: <?php echo $_SESSION['doc_id']; ?>
     </h3>
+    <div style="position: absolute; left: 10px; margin-top: -100px;">
+        <button class="btn btn-primary" style="background-color: #313866;" data-toggle="modal" data-target="#activityLogModal">
+            <i class="fas fa-file"></i> History
+        </button>
+    </div>
     <div class="row">
   <div class="col-md-4" style="max-width:18%;margin-top: 3%;">
     <div class="list-group" id="list-tab" role="tablist">
@@ -218,7 +218,6 @@ if(isset($_GET['cancel']))
 
             $dname = $_SESSION['doc_id'];
 
-            // Updated query to fetch IVs
             $query = "SELECT 
                         pid, ID, fname, lname, 
                         gender, gender_iv, 
@@ -351,7 +350,7 @@ if(isset($_GET['cancel']))
                   }
 
                   while ($row = mysqli_fetch_array($result)) {
-                      // Decrypt sensitive fields
+            
                       $decryptedFname = decryptData($row['fname'], $row['fname_iv']);
                       $decryptedLname = decryptData($row['lname'], $row['lname_iv']);
                       $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
@@ -451,8 +450,66 @@ if(isset($_GET['cancel']))
   </div>
 </div>
    </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+   <div class="modal fade" id="activityLogModal" tabindex="-1" role="dialog" aria-labelledby="activityLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityLogModalLabel">Activity Log</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php
+                // get logged-in doctor's ID from the session
+                $docId = $_SESSION['doc_id'];
+
+                // fetch activity log for the logged-in doctor
+                $query = mysqli_query($con, "
+                    SELECT 
+                        a.activity, 
+                        a.activity_iv, 
+                        a.created_on, 
+                        p.fname AS patient_fname, 
+                        p.lname AS patient_lname
+                    FROM activity_log a
+                    LEFT JOIN patreg p ON a.pid = p.pid
+                    WHERE a.doc_id = '$docId'
+                    AND (login = '' OR login IS NULL) 
+                    ORDER BY a.created_on DESC
+                ");
+                if (mysqli_num_rows($query) > 0) {
+                    echo "<table class='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Patient</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>";
+                    while ($row = mysqli_fetch_assoc($query)) {
+                        $decryptedActivity = decryptData($row['activity'], $row['activity_iv']);
+                        $patientName = !empty($row['patient_fname']) ? "{$row['patient_fname']} {$row['patient_lname']}" : "N/A";
+                        echo "<tr>
+                                <td>{$decryptedActivity}</td>
+                                <td>{$patientName}</td>
+                                <td>{$row['created_on']}</td>
+                              </tr>";
+                    }
+                    echo "</tbody>
+                          </table>";
+                } else {
+                    echo "<p>No activity log found.</p>";
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
