@@ -6,7 +6,6 @@ use Dotenv\Dotenv;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Load .env file
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -18,25 +17,25 @@ $mail = new PHPMailer(true);
 $_SESSION['database_csrf_token'] = NULL;
 
 if ($_SESSION['database_csrf_token'] != NULL) {
-  $username = $_SESSION['username']; // or use $_SESSION['pid'] or any other identifier
+  $username = $_SESSION['username']; 
   
-  // Step 2: Query the database to get the CSRF token associated with the user
+  // get the CSRF token associated with the user
   $query = "SELECT csrf_token FROM admintb WHERE username='$username'";
   $result = mysqli_query($con, $query);
 
   if ($result && mysqli_num_rows($result) == 1) {
-      // Step 3: Fetch the CSRF token from the database
+      // fetch the CSRF token from the database
       $row = mysqli_fetch_assoc($result);
       $_SESSION['database_csrf_token'] = $row['csrf_token'];
 
-      // Step 4: Compare the CSRF token from the form, session, and database
+      // compare the CSRF token from the form, session, and database
       if ($_SESSION['database_csrf_token'] !== $_SESSION['csrf_token']) {
           // Tokens do not match, redirect to the error page
           header("Location: csrf_error.php");
           exit();
       }
   } else {
-      // If no CSRF token is found in the database, redirect to the error page
+      // if no CSRF token is found in the database, redirect to the error page
       header("Location: csrf_error.php");
       exit();
   }
@@ -580,12 +579,14 @@ if(isset($_POST['docsub1']))
                     </select>
                     </div><br><br>
                   <div class="col-md-4"><label>Email ID:</label></div>
-                  <div class="col-md-8"><input type="email"  class="form-control" name="demail" required></div><br><br>
-                                   
+                  <div class="col-md-8"><input type="email" id="email" class="form-control" name="demail" onkeyup="checkDuplicateEmail();" required>
+                  <span id="emailError" style="color: red;"></span><br> 
+                </div><br><br>
+                             
                   <div class="col-md-4"><label>Consultancy Fees:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control"  name="docFees" required></div><br><br>
                 </div>
-          <input type="submit" name="docsub" value="Add Doctor" class="btn btn-primary">
+          <input type="submit" id="btnRegister" name="docsub" value="Add Doctor" class="btn btn-primary">
         </form>
       </div>
 
@@ -1100,6 +1101,48 @@ function updateDoctorDropdown(doctors) {
             rows[i].style.display = match ? "" : "none";
         }
     }
+
+    function checkDuplicateEmail() {
+			const email = document.getElementById('email').value;
+			const emailError = document.getElementById('emailError');
+			const submitButton = document.getElementById('btnRegister');
+
+			emailError.innerHTML = "";
+
+			const emailPattern = /^[^\s@]+@[^\s@]+\.[a-z]{2,3}$/;
+			if (!emailPattern.test(email)) {
+				emailError.style.color = 'red';
+				emailError.innerHTML = "Please enter a valid email address.";
+				return;
+			}
+
+			// check if the email already exists in the database
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", "check_email.php", true); 
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var response = xhr.responseText.trim(); 
+
+					if (response === "exists") {
+						emailError.style.color = 'red';
+						emailError.innerHTML = "This email is already registered.";
+						submitButton.disabled = true; // disable submit button
+					} else if (response === "available") {
+						emailError.style.color = 'green';
+						emailError.innerHTML = "Email is available.";
+						submitButton.disabled = false; // enable submit button
+					} else {
+						emailError.style.color = 'orange';
+						emailError.innerHTML = "Unexpected response from the server.";
+					}
+				}
+			};
+
+			// send the email to the server for checking
+			xhr.send("email=" + encodeURIComponent(email));
+		}
 </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

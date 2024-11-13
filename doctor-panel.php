@@ -10,6 +10,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+$mail = new PHPMailer(true);
+
 function encryptData($data) {
   $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
   $cipherMethod = $_ENV['CIPHER_METHOD']; 
@@ -43,26 +48,24 @@ if(isset($_GET['cancel']))
     }
   }
 
-  // if(isset($_GET['prescribe'])){
-    
-  //   $pid = $_GET['pid'];
-  //   $ID = $_GET['ID'];
-  //   $appdate = $_GET['appdate'];
-  //   $apptime = $_GET['apptime'];
-  //   $disease = $_GET['disease'];
-  //   $allergy = $_GET['allergy'];
-  //   $prescription = $_GET['prescription'];
-  //   $query=mysqli_query($con,"insert into prestb(doctor,pid,ID,appdate,apptime,disease,allergy,prescription) values ('$doctor',$pid,$ID,'$appdate','$apptime','$disease','$allergy','$prescription');");
-  //   if($query)
-  //   {
-  //     echo "<script>alert('Prescribed successfully!');</script>";
-  //   }
-  //   else{
-  //     echo "<script>alert('Unable to process your request. Try again!');</script>";
-  //   }
-  // }
+  $doctorId = $_SESSION['doc_id'];
+  $query = "SELECT email, email_iv FROM doctb WHERE doc_id = '$doctorId'";
+  $result = mysqli_query($con, $query);
 
+  // Check if the doctor exists
+  if (mysqli_num_rows($result) > 0) {
+      // Fetch the encrypted email and IV
+      $row = mysqli_fetch_assoc($result);
+      $encryptedEmail = $row['email'];
+      $emailIv = $row['email_iv']; // Get the IV used during encryption
 
+      // Decrypt the email using both encrypted data and IV
+      $decryptedEmail = decryptData($encryptedEmail, $emailIv);
+  } else {
+      $decryptedEmail = ''; // Default value if no email is found
+  }
+
+ 
 ?>
 <html lang="en">
   <head>
@@ -107,20 +110,21 @@ if(isset($_GET['cancel']))
 }
   </style>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-     <ul class="navbar-nav mr-auto">
-       <li class="nav-item">
-        <a class="nav-link" href="logout1.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
-      </li>
-       <li class="nav-item">
-        <a class="nav-link" href="#"></a>
-      </li>
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownProfile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user-circle" style="color: white;"></i> Profile
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                <a class="dropdown-item" href="docprofile.php"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="logout1.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </li>
     </ul>
-    <form class="form-inline my-2 my-lg-0" method="post" action="search.php">
-      <input class="form-control mr-sm-2" type="text" placeholder="Enter contact number" aria-label="Search" name="contact">
-      <input type="submit" class="btn btn-outline-light" id="inputbtn" name="search_submit" value="Search">
-    </form>
-  </div>
+</div>
+
 </nav>
   </head>
   <style type="text/css">
@@ -426,9 +430,7 @@ if(isset($_GET['cancel']))
       </div>
 
 
-
-
-
+      
       <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
       <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
         <form class="form-group" method="post" action="admin-panel1.php">
@@ -508,6 +510,45 @@ if(isset($_GET['cancel']))
     </div>
 </div>
 
+<script>
+
+    document.getElementById('save-btn').addEventListener('click', function () {
+        const email = document.getElementById('email').value;
+
+        // send OTP to the email via AJAX
+        fetch('doctor-panel.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `send_otp=1&email=${email}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data); 
+            document.getElementById('otp-section').style.display = 'block'; // show OTP section
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('verify-btn').style.display = 'inline-block';
+        });
+    });
+
+    document.getElementById('verify-btn').addEventListener('click', function () {
+        const otp = document.getElementById('otp').value;
+
+        // validate OTP via AJAX
+        fetch('doctor-panel.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `validate_otp=1&otp=${otp}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data); 
+            if (data.includes('OTP is valid')) {
+                // proceed to reset password
+                document.getElementById('password-section').style.display = 'block';
+            }
+        });
+    });
+</script>
 
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

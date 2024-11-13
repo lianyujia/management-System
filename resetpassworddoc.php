@@ -1,5 +1,5 @@
 <?php
-include('resetpassword.html');
+include('resetpassworddoc.html');
 session_start();
 require_once __DIR__ . '/vendor/autoload.php';  
 use PHPMailer\PHPMailer\PHPMailer;
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['email'])) {
     $_SESSION['input_email'] = $input_email;
 
     // find email in the database
-    $query = "SELECT * FROM patreg";
+    $query = "SELECT * FROM doctb";
     $result = mysqli_query($con, $query);
     if (!$result) {
         echo "Database query failed: " . mysqli_error($con);
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['email'])) {
                 $mail->addAddress($input_email);
                 $mail->isHTML(true);
                 $mail->Subject = "OTP for Password Reset";
-                $mail->Body = "<p>Your OTP is: <strong>$otp</strong>. The OTP will expire within 2 minutes.</p>";
+                $mail->Body = "<p>Your OTP is: <strong>$otp</strong> .The OTP will expire within 2 minutes.</p>";
 
                 if ($mail->send()) {
                     echo "<script>
@@ -96,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['otp'])) {
             $temp_password = bin2hex(random_bytes(4));
             $hashed_password = password_hash($temp_password, PASSWORD_DEFAULT);
 
-            $update_stmt = $con->prepare("UPDATE patreg SET password = ? WHERE email = ?");
+            $update_stmt = $con->prepare("UPDATE doctb SET password = ? WHERE email = ?");
             $update_stmt->bind_param("ss", $hashed_password, $_SESSION['email']);
 
             if ($update_stmt->execute()) {

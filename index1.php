@@ -88,10 +88,11 @@ include("header.php");
                   <div class="col-md-8"><input type="text" name="email" class="form-control" placeholder="enter email ID" required/></div><br><br>
                   <div class="col-md-4" style="margin-top: 8%"><label>Password: </label></div>
                   <div class="col-md-8" style="margin-top: 8%"><input type="password" class="form-control" name="password2" placeholder="enter password" required/></div><br><br><br>
+                  <a href="resetpassword.html" style="right: 20px; position: absolute; margin-top: 150px;">Forgot Password?</a>
                 </div>
                 <div class="row">
                  <div class="col-md-4"  style="padding-left: 160px;margin-top: 10%">
-                    <center><input type="submit" id="inputbtn" name="patsub" value="Login" class="btn btn-primary"></center></div>           
+                    <center><input type="submit" id="inputbtn" name="patsub" value="Login" class="btn btn-primary" style="margin-left:30px"></center></div>           
                  <!--  <div class="col-md-8" style="margin-top: 10%">
                     <a href="index.php" class="btn btn-primary">Back</a></div> -->
                 </div>

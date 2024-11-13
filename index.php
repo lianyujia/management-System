@@ -34,6 +34,7 @@
 				uppercase: /[A-Z]/.test(password),
 				lowercase: /[a-z]/.test(password),
 				number: /\d/.test(password),
+				special: /[\W_]/.test(password), 
 			};
 
 			const passwordError = document.getElementById("passwordError");
@@ -41,23 +42,29 @@
 
 			if (!requirements.length) {
 				passwordError.innerHTML += "Password must be at least 6 characters long.<br>";
-				
 			}
 			if (!requirements.uppercase) {
 				passwordError.innerHTML += "Password must contain at least one uppercase letter.<br>";
-				
 			}
 			if (!requirements.lowercase) {
 				passwordError.innerHTML += "Password must contain at least one lowercase letter.<br>";
-				
 			}
 			if (!requirements.number) {
 				passwordError.innerHTML += "Password must contain at least one digit.<br>";
-				
+			}
+			if (!requirements.special) {
+				passwordError.innerHTML += "Password must contain at least one special character.<br>";
 			}
 
-			return requirements.length && requirements.uppercase && requirements.lowercase && requirements.number;
+			return (
+				requirements.length &&
+				requirements.uppercase &&
+				requirements.lowercase &&
+				requirements.number &&
+				requirements.special
+			);
 		}
+
 
 		function checkPasswordMatch() {
 			const password = document.getElementById('password').value;
@@ -77,10 +84,8 @@
 			const emailError = document.getElementById('emailError');
 			const submitButton = document.querySelector('.btnRegister');
 
-			// Clear previous error message
 			emailError.innerHTML = "";
 
-			// Basic email format validation
 			const emailPattern = /^[^\s@]+@[^\s@]+\.[a-z]{2,3}$/;
 			if (!emailPattern.test(email)) {
 				emailError.style.color = 'red';
@@ -88,34 +93,29 @@
 				return;
 			}
 
-			// AJAX request to check if the email already exists in the database
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "check_email.php", true); // Send to the check_email.php file
+			xhr.open("POST", "check_email.php", true); 
 			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4 && xhr.status === 200) {
-					var response = xhr.responseText.trim(); // Get the response from PHP, use trim() to remove any extra spaces
-
+					var response = xhr.responseText.trim(); 
 					if (response === "exists") {
 						emailError.style.color = 'red';
 						emailError.innerHTML = "This email is already registered.";
-						submitButton.disabled = true;
-						
+						submitButton.disabled = true; // disable submit button
 					} else if (response === "available") {
 						emailError.style.color = 'green';
 						emailError.innerHTML = "Email is available.";
-
-						submitButton.disabled = false;
-               			
+						submitButton.disabled = false; // enable submit button
 					} else {
 						emailError.style.color = 'orange';
-						emailError.innerHTML = "Unexpected response.";
+						emailError.innerHTML = "Unexpected response from the server.";
 					}
 				}
 			};
 
-			// Send the email to the server for checking
+			// send the email to the server for checking
 			xhr.send("email=" + encodeURIComponent(email));
 		}
 
@@ -124,13 +124,14 @@
 			const confirmPassword = document.getElementById("cpassword").value;
 			const email = document.getElementById("email").value;
 			const emailError = document.getElementById("emailError");
+			const firstName = document.getElementById("fname");
+			const lastName = document.getElementById("lname");
 
-			
 
-			// Reset previous error messages
+			// reset previous error messages
 			emailError.textContent = '';
 
-			// Email format validation
+			// email format validation
 			const emailPattern = /^[^\s@]+@[^\s@]+\.[a-z]{2,3}$/;
 			if (!emailPattern.test(email)) {
 				emailError.textContent = "Please enter a valid email address.";
@@ -140,17 +141,53 @@
 
 			const passwordValid = checkPasswordRequirements();
 			if (!passwordValid) {
-				return false; // Prevent form submission if password does not meet requirements
+				return false; 
 			}
 
-			// Ensure passwords match
+			// ensure passwords match
 			if (password !== confirmPassword) {
 				alert("Passwords do not match.");
+				return false;
+			}
+			// check if terms checkbox is checked
+			const termsCheckbox = document.getElementById('termsCheckbox');
+				if (!termsCheckbox.checked) {
+					alert('You must agree to the terms and conditions to register.');
+					return false;
+				}
+			const captchaResponse = grecaptcha.getResponse();
+			if (captchaResponse.length === 0) {
+				document.getElementById('captchaError').textContent = "Please complete the CAPTCHA.";
 				return false;
 			}
 
 			return true;
 		}
+		function confirmAgreement() {
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        if (!termsCheckbox.checked) {
+            alert('You must agree to the terms and conditions to register.');
+            return false;
+        }
+        document.getElementById('registrationForm').submit(); 
+		exit;	
+	}
+
+
+
+	document.addEventListener("DOMContentLoaded", function () {
+            
+            var termsLink = document.getElementById("termsLink");
+            var termsModal = new bootstrap.Modal(document.getElementById("termsModal"));
+            
+            termsLink.addEventListener("click", function (event) {
+                event.preventDefault(); 
+                termsModal.show(); // show the modal
+            });
+
+            
+        });
+
 	</script>
 </head>
 
@@ -214,10 +251,8 @@
 										<input type="password" class="form-control" placeholder="Password *" id="password" name="password" onkeyup="checkPasswordRequirements(); checkPasswordMatch();" minlength="6" required/>
 										<span id="passwordError" style="color: red;"></span>
 									</div>
-									<div class="form-group">
-										<div class="g-recaptcha" data-sitekey="6LeMs3kqAAAAAOadGAZwyxRbWyzpn0-E8AtapfGJ"></div>
-										<span id="captchaError" style="color: red; display: block; margin-top: 10px;"></span> <!-- reCAPTCHA error message -->
-									</div>
+									
+									
 									<div class="form-group">
 										<div class="maxl">
 											<label class="radio inline">
@@ -229,8 +264,17 @@
 												<span>Female</span>
 											</label>
 										</div>
-										<a href="index1.php">Already have an account?</a>
-										<a href="resetpassword.html">Forgot Password?</a>
+										<div class="form-group">
+											<div class="g-recaptcha" data-sitekey="6LeMs3kqAAAAAOadGAZwyxRbWyzpn0-E8AtapfGJ"></div>
+											<span id="captchaError" style="color: red; display: block; margin-top: 10px;"></span> <!-- reCAPTCHA error message -->
+										</div>
+										<div class="form-group" style="display: flex; align-items: center;">
+											<input type="checkbox" id="termsCheckbox" required style="margin-right: 5px;">
+											<label for="termsCheckbox" style="margin: 0;">
+												I agree to the <a href="#" id="termsLink">Terms and Conditions</a>
+											</label>
+										</div>
+										<a href="index1.php" style="top: 40px; position: relative;">Already have an account?</a>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -244,7 +288,7 @@
 										<input type="password" class="form-control" id="cpassword" placeholder="Confirm Password *" name="cpassword" onkeyup="checkPasswordMatch();" required />
 										<span id="message"></span>
 									</div>
-									<input type="submit" class="btnRegister" name="patsub1" value="Register" style="margin-top: 120px; margin-left: 50px;"/>
+									<input type="submit" class="btnRegister" name="patsub1" value="Register" style="margin-top: 230px; margin-left: 100px;"/>
 									
 								</div>
 								
@@ -267,6 +311,7 @@
                                         
                                         <input type="submit" class="btnRegister" name="docsub1" value="Login"/>
                                     </div>
+									<a href="resetpassworddoc.html" >Forgot Password?</a>
                                 </div>
                             </form>
                             </div>
@@ -326,12 +371,34 @@
     </div>
 </div>
 
-
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                
+            </div>
+            <div class="modal-body">
+                <h6>Terms and Conditions</h6>
+                <p>Put your detailed terms and conditions content here.</p>
+           
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     </html>
 
   

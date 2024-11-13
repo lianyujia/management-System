@@ -23,7 +23,8 @@ function decryptData($encryptedData, $iv) {
 if (isset($_POST['email'])) {
     $email = mysqli_real_escape_string($con, $_POST['email']); 
 
-    $email_check_query = "SELECT email, email_iv FROM patreg"; 
+    // get the encrypted emails from the database
+    $email_check_query = "SELECT email, email_iv FROM doctb"; 
     $email_check_result = mysqli_query($con, $email_check_query);
 
     if ($email_check_result === false) {
@@ -38,7 +39,7 @@ if (isset($_POST['email'])) {
     while ($row = mysqli_fetch_assoc($email_check_result)) {
         $encrypted_email = $row['email'];
         $iv = $row['email_iv'];
-
+        
         $decrypted_email = decryptData($encrypted_email, $iv);
 
         // compare decrypted email with the input email
@@ -51,7 +52,7 @@ if (isset($_POST['email'])) {
     if ($email_found) {
         echo "exists"; // email exists
     } else {
-        echo "available"; // email is available, can proceed to use
+        echo "available"; // email is available, can proceed
     }
 } else {
 

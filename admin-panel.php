@@ -20,25 +20,25 @@ $_SESSION['database_csrf_token'] = null;
 
 
 if ($_SESSION['database_csrf_token'] == null) {
-    $pid = $_SESSION['pid']; // or use $_SESSION['pid'] or any other identifier
+    $pid = $_SESSION['pid']; 
     
-    // Step 2: Query the database to get the CSRF token associated with the user
+    // get the CSRF token associated with the user
     $query = "SELECT csrf_token FROM patreg WHERE pid='$pid'";
     $result = mysqli_query($con, $query);
 
     if ($result && mysqli_num_rows($result) == 1) {
-        // Step 3: Fetch the CSRF token from the database
+        // fetch the CSRF token from the database
         $row = mysqli_fetch_assoc($result);
         $_SESSION['database_csrf_token'] = $row['csrf_token'];
 
-        // Step 4: Compare the CSRF token from the form, session, and database
+        // compare the CSRF token from the form, session, and database
         if ($_SESSION['database_csrf_token'] !== $_SESSION['csrf_token']) {
             // Tokens do not match, redirect to the error page
             header("Location: csrf_error.php");
             exit();
         }
     } else {
-        // If no CSRF token is found in the database, redirect to the error page
+        // if no CSRF token is found in the database, redirect to the error page
         header("Location: csrf_error.php");
         exit();
     }
@@ -62,14 +62,14 @@ if (!function_exists('decryptData')) {
       $encryptionKey = getenv('ENCRYPTION_KEY');
       $cipherMethod = getenv('CIPHER_METHOD');
       
-      // Decode the IV and check its length
+      // decode the IV and check its length
       $decodedIV = base64_decode($iv);
       if (strlen($decodedIV) !== openssl_cipher_iv_length($cipherMethod)) {
           error_log("Decryption error: IV length is incorrect.");
           return null;
       }
 
-      // Perform decryption
+      // perform decryption
       $decryptedData = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $decodedIV);
       if ($decryptedData === false) {
           error_log("Decryption error: Unable to decrypt data.");
@@ -239,13 +239,12 @@ function generate_bill($appointmentId) {
       die("Connection failed: " . mysqli_connect_error());
   }
 
-  // Ensure the appointment ID is passed and valid
   if (!$appointmentId) {
       echo "Invalid appointment ID.";
       return;
   }
 
-  // Query to fetch data for the specific appointment ID
+  // fetch data for the specific appointment ID
   $query = "
       SELECT 
           p.doctor,
@@ -314,18 +313,14 @@ if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
   $obj_pdf->SetFont('helvetica', '', 12);
   $obj_pdf->AddPage();
 
-  $user_password = $email . $contact;
-
-  $obj_pdf->SetProtection(['print', 'copy'], $user_password);
-
-  // Fetch content for the specific appointment ID
+  // fetch content for the specific appointment ID
   $content = '';
   $content .= '
       <br/>
       <h2 align="center"> Global Hospitals</h2><br/>
       <h3 align="center"> Bill</h3>
   ';
-  $content .= generate_bill($appointmentId); // Pass the appointment ID to the function
+  $content .= generate_bill($appointmentId); // pass the appointment ID to the function
 
   $obj_pdf->writeHTML($content);
   ob_end_clean();
@@ -350,26 +345,20 @@ function get_specs(){
 
 
   <meta charset="utf-8">
-    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="style.css">
-    
-    <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
 
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-     -->
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
   <a class="navbar-brand" href="#"><i class="fa fa-user-plus" aria-hidden="true"></i> Global Hospital </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -395,16 +384,20 @@ function get_specs(){
 }
   </style>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-     <ul class="navbar-nav mr-auto">
-       <li class="nav-item">
-        <a class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
-      </li>
-       <li class="nav-item">
-        <a class="nav-link" href="#"></a>
-      </li>
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownProfile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user-circle" style="color: white;"></i> Profile
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                <a class="dropdown-item" href="patientprofile.php"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </li>
     </ul>
-  </div>
+</div>
 </nav>
   </head>
   <style type="text/css">
@@ -858,13 +851,6 @@ function get_specs(){
 </div>
 
 
-
-<!-- Modal Styling -->
-<style>
-  /* .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-  .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; text-align: center; }
-  .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; } */
-</style>
    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -873,17 +859,16 @@ function get_specs(){
    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.10.1/sweetalert2.all.min.js">
    </script>
    <script>
+
   // open the modal
   function openPaymentModal(appointmentId) {
-    // Set the appointment ID in the hidden input field
+    // set the appointment ID in the hidden input field
     document.getElementById('appointmentId').value = appointmentId;
 
-    // Show the modal
+    // show the modal
     $('#paymentModal').modal('show');
 }
 
-
-// Close the modal using Bootstrap's modal method
 function closePaymentModal() {
     $('#paymentModal').modal('hide');
 }
@@ -902,6 +887,10 @@ window.onclick = function(event) {
   }
 
   document.querySelector(".close").onclick = closePaymentModal;
+
+  $(document).ready(function () {
+        $('.dropdown-toggle').dropdown(); 
+    });
 </script>
 
 
