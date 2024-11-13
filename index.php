@@ -487,7 +487,6 @@
     <ul>
         <li><strong>Personal Information:</strong> Includes name, contact details, date of birth, address, and other personal identifiers.</li>
         <li><strong>Health Records:</strong> Includes medical history, prescriptions, test results, diagnoses, and treatment plans.</li>
-        <li><strong>System Usage Data:</strong> Includes login activity, IP addresses, and interactions within the HMS.</li>
         <li><strong>Financial Information:</strong> Includes payment details for services (if applicable).</li>
     </ul>
 
