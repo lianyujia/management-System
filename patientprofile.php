@@ -178,14 +178,14 @@ if (isset($_POST['validate_otp'])) {
         }
     </style>
   </head>
-  <body style="padding-top:50px; font-family: 'IBM Plex Sans', sans-serif;">
+  <body style="padding-top:50px; font-family: 'IBM Plex Sans', sans-serif; background-color: #EEEEEE;">
     <div class="container">
       <h3 class="text-center">Patient Profile</h3>
       <div class="card mt-4">
         <div class="card-header bg-primary text-white">
           <h5>Profile Information</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
           <form method="post">
             <div class="form-group">
               <label for="name">Name</label>

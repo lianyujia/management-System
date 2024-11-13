@@ -190,35 +190,66 @@ if (isset($_POST['docsub1'])) {
 
   <style >
     .bg-primary {
-    background: -webkit-linear-gradient(left, #3931af, #00c6ff);
-}
+        background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+    }
 
-.col-md-4{
-  max-width:20% !important;
-}
+    .col-md-4{
+    max-width:20% !important;
+    }
 
-.list-group-item.active {
-    z-index: 2;
-    color: #fff;
-    background-color: #342ac1;
-    border-color: #007bff;
-}
-.text-primary {
-    color: #342ac1!important;
-}
+    .list-group-item.active {
+        z-index: 2;
+        color: #fff;
+        background-color: #342ac1;
+        border-color: #007bff;
+    }
+    .text-primary {
+        color: #342ac1!important;
+    }
 
-#cpass {
-  display: -webkit-box;
-}
+    #cpass {
+    display: -webkit-box;
+    }
 
-#list-app{
-  font-size:15px;
-}
+    #list-app{
+    font-size:15px;
+    }
 
-.btn-primary{
-  background-color: #3c50c1;
-  border-color: #3c50c1;
-}
+    .btn-primary{
+    background-color: #3c50c1;
+    border-color: #3c50c1;
+    }
+
+    #doctorTable, #patientTable, #appointmentTable {
+        border: 1px solid #ddd; 
+        border-collapse: collapse; 
+        width: 100%; 
+        background-color: #ffffff; 
+        font-size: 16px; 
+        color: #333; 
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #doctorTable th, #patientTable th, #appointmentTable th  {
+        background-color: #f5f5f5; 
+        color: #000; 
+        text-align: left; 
+        padding: 20px;
+        border-bottom: 2px solid #ddd;
+        }
+
+        #doctorTable td, #patientTable td, #appointmentTable td {
+        padding: 20px;
+        border-bottom: 1px solid #ddd; 
+
+        }
+
+        #doctorTable tbody tr:hover, #patientTable tbody tr:hover, #appointmentTable tbody tr:hover {
+        background-color: #f0f8ff; 
+        cursor: pointer;
+        }
+
   </style>
 
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -237,7 +268,7 @@ if (isset($_POST['docsub1'])) {
     button:hover{cursor:pointer;}
     #inputbtn:hover{cursor:pointer;}
   </style>
-  <body style="padding-top:50px;">
+  <body style="padding-top:50px; background-color: #EEEEEE;">
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family: 'IBM Plex Sans', sans-serif;"> WELCOME RECEPTIONIST </h3>
     <div style="position: absolute; right: 10px; margin-top: -100px;">
@@ -247,7 +278,7 @@ if (isset($_POST['docsub1'])) {
     </div>
     <div class="row">
   <div class="col-md-4" style="max-width:25%;margin-top: 3%;">
-    <div class="list-group" id="list-tab" role="tablist">
+    <div class="list-group" id="list-tab" role="tablist" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
       <a class="list-group-item list-group-item-action active" id="list-dash-list" data-toggle="list" href="#list-dash" role="tab" aria-controls="home">Dashboard</a>
       <a class="list-group-item list-group-item-action" href="#list-doc" id="list-doc-list"  role="tab"    aria-controls="home" data-toggle="list">Doctor List</a>
       <a class="list-group-item list-group-item-action" href="#list-pat" id="list-pat-list"  role="tab" data-toggle="list" aria-controls="home">Patient List</a>
@@ -264,12 +295,13 @@ if (isset($_POST['docsub1'])) {
 
 
       <div class="tab-pane fade show active" id="list-dash" role="tabpanel" aria-labelledby="list-dash-list">
-        <div class="container-fluid container-fullw bg-white" >
-              <div class="row">
+        <div class="container-fluid container-fullw bg-white">
+              <div class="row" style="background-color: #EEEEEE;">
                <div class="col-sm-4">
                   <div class="panel panel-white no-radius text-center">
                     <div class="panel-body">
-                      <span class="fa-stack fa-2x"> <i class="fa fa-square fa-stack-2x text-primary"></i> <i class="fa fa-users fa-stack-1x fa-inverse"></i> </span>
+                      <span class="fa-stack fa-2x"> <i class="fa fa-square fa-stack-2x text-primary"></i> <i class="fa fa-user-md fa-stack-1x fa-inverse"></i>
+                      </span>
                       <h4 class="StepTitle" style="margin-top: 5%;">Doctor List</h4>
                       <script>
                         function clickDiv(id) {
@@ -317,7 +349,7 @@ if (isset($_POST['docsub1'])) {
                 </div>
                 </div>
 
-                <div class="row">
+                <div class="row" style="background-color: #EEEEEE;">
                 
 
                 <div class="col-sm-4" style="left: 18%;margin-top: 5%">
@@ -365,7 +397,7 @@ if (isset($_POST['docsub1'])) {
 
             <div class="tab-pane fade" id="list-doc" role="tabpanel" aria-labelledby="list-home-list">
     <div class="col-md-8">
-        <input type="text" id="filterDoctorInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterDoctorTable()">
+        <input type="text" id="filterDoctorInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterDoctorTable()" style="border: solid 1px black;">
     </div>
     <table class="table table-hover" id="doctorTable" style="margin-top: 20px;">
         <thead>
@@ -413,7 +445,7 @@ if (isset($_POST['docsub1'])) {
 
 <div class="tab-pane fade" id="list-pat" role="tabpanel" aria-labelledby="list-pat-list">
     <div class="col-md-8">
-        <input type="text" id="filterPatientInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPatientTable()">
+        <input type="text" id="filterPatientInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPatientTable()" style="border: solid 1px black;">
     </div>
     <table class="table table-hover" id="patientTable" style="margin-top: 20px;">
         <thead>
@@ -471,7 +503,7 @@ if (isset($_POST['docsub1'])) {
       <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
 
       <div class="col-md-8">
-          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()">
+          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()" style="border: solid 1px black;">
       </div>
 
           <table class="table table-hover" id="appointmentTable" style="margin-top: 20px;">

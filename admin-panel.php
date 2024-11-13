@@ -365,22 +365,52 @@ function get_specs(){
 
   <style >
     .bg-primary {
-    background: -webkit-linear-gradient(left, #3931af, #00c6ff);
-}
-.list-group-item.active {
-    z-index: 2;
-    color: #fff;
-    background-color: #342ac1;
-    border-color: #007bff;
-}
-.text-primary {
-    color: #342ac1!important;
-}
+      background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+    }
+    .list-group-item.active {
+        z-index: 2;
+        color: #fff;
+        background-color: #342ac1;
+        border-color: #007bff;
+    }
+    .text-primary {
+        color: #342ac1!important;
+    }
 
-.btn-primary{
-  background-color: #3c50c1;
-  border-color: #3c50c1;
-}
+    .btn-primary{
+      background-color: #3c50c1;
+      border-color: #3c50c1;
+    }
+
+    #presTable, #appointmentTable {
+        border: 1px solid #ddd; 
+        border-collapse: collapse; 
+        width: 100%; 
+        background-color: #ffffff; 
+        font-size: 16px; 
+        color: #333; 
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #presTable th, #appointmentTable th  {
+        background-color: #f5f5f5; 
+        color: #000; 
+        text-align: left; 
+        padding: 20px;
+        border-bottom: 2px solid #ddd;
+        }
+
+        #presTable td, #appointmentTable td {
+        padding: 20px;
+        border-bottom: 1px solid #ddd; 
+
+        }
+
+        #presTable tbody tr:hover, #appointmentTable tbody tr:hover {
+        background-color: #f0f8ff; 
+        cursor: pointer;
+        }
   </style>
 
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -403,7 +433,7 @@ function get_specs(){
     button:hover{cursor:pointer;}
     #inputbtn:hover{cursor:pointer;}
   </style>
-  <body style="padding-top:50px;">
+  <body style="padding-top:50px; background-color: #EEEEEE;">
   
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%;  padding-bottom: 20px; font-family: 'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $username ?> 
@@ -415,7 +445,7 @@ function get_specs(){
     </div>
     <div class="row">
   <div class="col-md-4" style="max-width:25%; margin-top: 3%">
-    <div class="list-group" id="list-tab" role="tablist">
+    <div class="list-group" id="list-tab" role="tablist" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
       <a class="list-group-item list-group-item-action active" id="list-dash-list" data-toggle="list" href="#list-dash" role="tab" aria-controls="home">Dashboard</a>
       <a class="list-group-item list-group-item-action" id="list-home-list" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Book Appointment</a>
       <a class="list-group-item list-group-item-action" href="#app-hist" id="list-pat-list" role="tab" data-toggle="list" aria-controls="home">Appointment History</a>
@@ -429,8 +459,8 @@ function get_specs(){
 
 
       <div class="tab-pane fade  show active" id="list-dash" role="tabpanel" aria-labelledby="list-dash-list">
-        <div class="container-fluid container-fullw bg-white" >
-              <div class="row">
+        <div>
+              <div class="row" style="background-color: #EEEEEE;">
                <div class="col-sm-4" style="left: 5%">
                   <div class="panel panel-white no-radius text-center">
                     <div class="panel-body">
@@ -604,7 +634,7 @@ function get_specs(){
       </div>
       
       <div class="tab-pane fade" id="app-hist" role="tabpanel" aria-labelledby="list-pat-list">
-    <table class="table table-hover">
+    <table class="table table-hover" id="appointmentTable">
         <thead>
             <tr>
                 <th scope="col">Doctor Name</th>
@@ -682,7 +712,7 @@ function get_specs(){
 
       <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
         
-              <table class="table table-hover">
+              <table class="table table-hover" id="presTable">
                 <thead>
                   <tr>
                     
@@ -737,8 +767,7 @@ function get_specs(){
                           <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
                           <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                         <td>
-                        <form method="get" action="payment-details.php">
-                        <td>
+                        <form method="get" action="payment-details.php">                      
                             <button type="button" onclick="openPaymentModal('<?php echo $row['ID']; ?>')" class="btn btn-success">Pay Bill</button>
                         </td>
 

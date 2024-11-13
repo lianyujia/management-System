@@ -92,21 +92,49 @@ if(isset($_GET['cancel']))
         background-color: #f8f9fa;
         border-color: #f8f9fa;
       }
-    </style>
 
-  <style >
-    .bg-primary {
-    background: -webkit-linear-gradient(left, #3931af, #00c6ff);
-}
-.list-group-item.active {
-    z-index: 2;
-    color: #fff;
-    background-color: #342ac1;
-    border-color: #007bff;
-}
-.text-primary {
-    color: #342ac1!important;
-}
+      .bg-primary {
+      background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+      }
+      .list-group-item.active {
+          z-index: 2;
+          color: #fff;
+          background-color: #342ac1;
+          border-color: #007bff;
+      }
+      .text-primary {
+          color: #342ac1!important;
+      }
+
+      #presTable, #appointmentTable {
+        border: 1px solid #ddd; 
+        border-collapse: collapse; 
+        width: 100%; 
+        background-color: #ffffff; 
+        font-size: 16px; 
+        color: #333; 
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #presTable th, #appointmentTable th  {
+        background-color: #f5f5f5; 
+        color: #000; 
+        text-align: left; 
+        padding: 20px;
+        border-bottom: 2px solid #ddd;
+        }
+
+        #presTable td, #appointmentTable td {
+        padding: 20px;
+        border-bottom: 1px solid #ddd; 
+
+        }
+
+        #presTable tbody tr:hover, #appointmentTable tbody tr:hover {
+        background-color: #f0f8ff; 
+        cursor: pointer;
+        }
   </style>
 
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -130,7 +158,7 @@ if(isset($_GET['cancel']))
     button:hover{cursor:pointer;}
     #inputbtn:hover{cursor:pointer;}
   </style>
-  <body style="padding-top:50px;">
+  <body style="padding-top:50px; background-color: #EEEEEE;">
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%; padding-bottom: 20px;font-family:'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $_SESSION['dname']; ?>, Your ID: <?php echo $_SESSION['doc_id']; ?>
     </h3>
@@ -141,7 +169,7 @@ if(isset($_GET['cancel']))
     </div>
     <div class="row">
   <div class="col-md-4" style="max-width:18%;margin-top: 3%;">
-    <div class="list-group" id="list-tab" role="tablist">
+    <div class="list-group" id="list-tab" role="tablist" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
       <a class="list-group-item list-group-item-action active" href="#list-dash" role="tab" aria-controls="home" data-toggle="list">Dashboard</a>
       <a class="list-group-item list-group-item-action" href="#list-app" id="list-app-list" role="tab" data-toggle="list" aria-controls="home">Appointments</a>
       <a class="list-group-item list-group-item-action" href="#list-pres" id="list-pres-list" role="tab" data-toggle="list" aria-controls="home"> Prescription List</a>
@@ -153,7 +181,7 @@ if(isset($_GET['cancel']))
       <div class="tab-pane fade show active" id="list-dash" role="tabpanel" aria-labelledby="list-dash-list">
         
               <div class="container-fluid container-fullw bg-white" >
-              <div class="row">
+              <div class="row" style="background-color: #EEEEEE;"> 
 
                <div class="col-sm-4" style="left: 10%">
                   <div class="panel panel-white no-radius text-center">
@@ -196,7 +224,7 @@ if(isset($_GET['cancel']))
 
          <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-home-list">
          <div class="col-md-8">
-          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()">
+          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()" style="border: solid 1px black;">
       </div>
       <table class="table table-hover" id="appointmentTable" style="margin-top: 20px;">
         <thead>
@@ -315,7 +343,7 @@ if(isset($_GET['cancel']))
 
       <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
       <div class="col-md-8">
-          <input type="text" id="filterInput2" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPresTable()">
+          <input type="text" id="filterInput2" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPresTable()" style="border: solid 1px black;">
       </div>
         <table class="table table-hover" id="presTable" style="margin-top: 20px;">
                 <thead>
