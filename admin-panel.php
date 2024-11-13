@@ -522,7 +522,7 @@ function get_specs(){
                           <label for="spec">Specialization:</label>
                         </div>
                         <div class="col-md-8">
-                          <select name="spec" class="form-control" id="spec">
+                          <select name="spec" class="form-control" id="spec" required="required">
                               <option value="" disabled selected>Select Specialization</option>
                               <?php 
                               display_specs();

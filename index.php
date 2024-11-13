@@ -152,7 +152,7 @@
 			// check if terms checkbox is checked
 			const termsCheckbox = document.getElementById('termsCheckbox');
 				if (!termsCheckbox.checked) {
-					alert('You must agree to the terms and conditions to register.');
+					alert('You must agree to the terms and conditions and Data policy to register.');
 					return false;
 				}
 			const captchaResponse = grecaptcha.getResponse();
@@ -166,7 +166,7 @@
 		function confirmAgreement() {
         const termsCheckbox = document.getElementById('termsCheckbox');
         if (!termsCheckbox.checked) {
-            alert('You must agree to the terms and conditions to register.');
+            alert('You must agree to the terms and conditions and Data policy to register.');
             return false;
         }
         document.getElementById('registrationForm').submit(); 
@@ -271,8 +271,8 @@
 										<div class="form-group" style="display: flex; align-items: center;">
 											<input type="checkbox" id="termsCheckbox" required style="margin-right: 5px;">
 											<label for="termsCheckbox" style="margin: 0;">
-												I agree to the <a href="#" id="termsLink">Terms and Conditions</a>
-											</label>
+                                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#dataPolicyModal">Data Policy</a>
+                                            </label>
 										</div>
 										<a href="index1.php" style="top: 40px; position: relative;">Already have an account?</a>
 									</div>
@@ -377,116 +377,130 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-                
             </div>
             <div class="modal-body">
-                <h6>Terms and Conditions</h6>
                 <div class="terms-conditions">
+                <p><strong>Welcome to the Hospital Management System (HMS).</strong> These terms and conditions govern your use of the platform. By accessing or using the HMS, you agree to abide by these terms. If you do not agree, please refrain from using the system.</p>
 
-    <p><strong>Welcome to the Hospital Management System (HMS).</strong> These terms and conditions govern your use of the platform. By accessing or using the HMS, you agree to abide by these terms. If you do not agree, please refrain from using the system.</p>
+<h5>1. General Terms</h5>
+<h5>1.1 Authorized Use</h5>
+<p>All users must use the system solely for purposes related to hospital operations, including appointment management, medical record maintenance, and administrative functions.</p>
 
-    <h5>1. General Terms</h5>
-    <h5>1.1 Authorized Use</h5>
-    <p>All users must use the system solely for purposes related to hospital operations, including appointment management, medical record maintenance, and administrative functions.</p>
+<h5>1.2 Data Privacy and Confidentiality</h5>
+<p>Users are responsible for safeguarding the privacy of patient data. Unauthorized access, modification, or distribution of sensitive information is strictly prohibited and may result in legal action.</p>
 
-    <h5>1.2 Data Privacy and Confidentiality</h5>
-    <p>Users are responsible for safeguarding the privacy of patient data. Unauthorized access, modification, or distribution of sensitive information is strictly prohibited and may result in legal action.</p>
+<h5>1.3 System Updates</h5>
+<p>The HMS may undergo updates to improve functionality or security. Users agree to adhere to any changes or updated terms that come with such improvements.</p>
 
-    <h5>1.3 System Updates</h5>
-    <p>The HMS may undergo updates to improve functionality or security. Users agree to adhere to any changes or updated terms that come with such improvements.</p>
+<h5>1.4 Prohibited Activities</h5>
+<ul>
+    <li>Tampering with system functionality.</li>
+    <li>Misusing data for personal gain.</li>
+    <li>Introducing malicious software or hacking attempts.</li>
+</ul>
 
-    <h5>1.4 Prohibited Activities</h5>
-    <ul>
-        <li>Tampering with system functionality.</li>
-        <li>Misusing data for personal gain.</li>
-        <li>Introducing malicious software or hacking attempts.</li>
-    </ul>
+<h5>1.5 Account Security</h5>
+<p>Users must maintain the confidentiality of their account credentials. Sharing credentials is strictly prohibited.</p>
 
-    <h5>1.5 Account Security</h5>
-    <p>Users must maintain the confidentiality of their account credentials. Sharing credentials is strictly prohibited.</p>
+<h5>2. Admin Role</h5>
+<h5>2.1 Responsibilities</h5>
+<p>Admins are responsible for managing user accounts, overseeing hospital operations within the system, and ensuring compliance with terms and conditions.</p>
 
-    <h5>2. Admin Role</h5>
-    <h5>2.1 Responsibilities</h5>
-    <p>Admins are responsible for managing user accounts, overseeing hospital operations within the system, and ensuring compliance with terms and conditions.</p>
+<h5>2.2 Data Access</h5>
+<p>Admins have access to all system data but must use this access responsibly and ensure that patient confidentiality is maintained.</p>
 
-    <h5>2.2 Data Access</h5>
-    <p>Admins have access to all system data but must use this access responsibly and ensure that patient confidentiality is maintained.</p>
+<h5>2.3 User Management</h5>
+<p>Admins can create, update, or deactivate user accounts (doctors and patients). Actions affecting user accounts must be based on legitimate operational needs.</p>
 
-    <h5>2.3 User Management</h5>
-    <p>Admins can create, update, or deactivate user accounts (doctors and patients). Actions affecting user accounts must be based on legitimate operational needs.</p>
+<h5>2.4 Audit Obligations</h5>
+<p>Admins are responsible for monitoring activities within the system and ensuring all users comply with these terms.</p>
 
-    <h5>2.4 Audit Obligations</h5>
-    <p>Admins are responsible for monitoring activities within the system and ensuring all users comply with these terms.</p>
+<h5>3. Doctor Role</h5>
+<h5>3.1 Responsibilities</h5>
+<p>Doctors are responsible for updating medical records, scheduling appointments, and providing medical care as documented in the system.</p>
 
-    <h5>3. Doctor Role</h5>
-    <h5>3.1 Responsibilities</h5>
-    <p>Doctors are responsible for updating medical records, scheduling appointments, and providing medical care as documented in the system.</p>
+<h5>3.2 Patient Data Management</h5>
+<p>Doctors must access patient data only for treatment purposes. Sharing or misusing patient information is strictly prohibited.</p>
 
-    <h5>3.2 Patient Data Management</h5>
-    <p>Doctors must access patient data only for treatment purposes. Sharing or misusing patient information is strictly prohibited.</p>
+<h5>3.3 Appointment Scheduling</h5>
+<p>Doctors must manage their schedules within the system and adhere to the timings and availability they provide.</p>
 
-    <h5>3.3 Appointment Scheduling</h5>
-    <p>Doctors must manage their schedules within the system and adhere to the timings and availability they provide.</p>
+<h5>3.4 Ethical Obligations</h5>
+<p>Doctors must ensure that all interactions within the HMS align with their professional and ethical standards.</p>
 
-    <h5>3.4 Ethical Obligations</h5>
-    <p>Doctors must ensure that all interactions within the HMS align with their professional and ethical standards.</p>
+<h5>4. Patient Role</h5>
+<h5>4.1 Responsibilities</h5>
+<p>Patients are responsible for ensuring their account information is accurate and up to date.</p>
 
-    <h5>4. Patient Role</h5>
-    <h5>4.1 Responsibilities</h5>
-    <p>Patients are responsible for ensuring their account information is accurate and up to date.</p>
+<h5>4.2 Appointment Management</h5>
+<p>Patients must use the system to book, reschedule, or cancel appointments in a timely manner. Missed appointments may result in restrictions.</p>
 
-    <h5>4.2 Appointment Management</h5>
-    <p>Patients must use the system to book, reschedule, or cancel appointments in a timely manner. Missed appointments may result in restrictions.</p>
+<h5>4.3 Medical Records</h5>
+<p>Patients can access their own medical records but must not attempt to alter or tamper with them.</p>
 
-    <h5>4.3 Medical Records</h5>
-    <p>Patients can access their own medical records but must not attempt to alter or tamper with them.</p>
+<h5>4.4 Feedback and Complaints</h5>
+<p>Patients are encouraged to report any issues or provide feedback regarding system functionality or services.</p>
 
-    <h5>4.4 Feedback and Complaints</h5>
-    <p>Patients are encouraged to report any issues or provide feedback regarding system functionality or services.</p>
+<h5>5. Data Protection and Security</h5>
+<h5>5.1 Confidentiality</h5>
+<p>The system is designed to comply with applicable data protection regulations (e.g., GDPR, HIPAA). All data is encrypted and stored securely.</p>
 
-    <h5>5. Data Protection and Security</h5>
-    <h5>5.1 Confidentiality</h5>
-    <p>The system is designed to comply with applicable data protection regulations (e.g., GDPR, HIPAA). All data is encrypted and stored securely.</p>
+<h5>5.2 User Consent</h5>
+<p>By using the HMS, users consent to the collection, storage, and processing of their personal information for operational purposes.</p>
 
-    <h5>5.2 User Consent</h5>
-    <p>By using the HMS, users consent to the collection, storage, and processing of their personal information for operational purposes.</p>
+<h5>5.3 Data Breach Response</h5>
+<p>In the event of a data breach, the HMS team will notify affected users promptly and take corrective actions.</p>
 
-    <h5>5.3 Data Breach Response</h5>
-    <p>In the event of a data breach, the HMS team will notify affected users promptly and take corrective actions.</p>
+<h5>6. Liability</h5>
+<h5>6.1 System Downtime</h5>
+<p>The HMS team strives to provide uninterrupted service but is not liable for downtimes caused by maintenance, technical issues, or unforeseen circumstances.</p>
 
-    <h5>6. Liability</h5>
-    <h5>6.1 System Downtime</h5>
-    <p>The HMS team strives to provide uninterrupted service but is not liable for downtimes caused by maintenance, technical issues, or unforeseen circumstances.</p>
+<h5>6.2 User Actions</h5>
+<p>The HMS is not responsible for actions performed by users, such as incorrect data input or misuse of the system.</p>
 
-    <h5>6.2 User Actions</h5>
-    <p>The HMS is not responsible for actions performed by users, such as incorrect data input or misuse of the system.</p>
+<h5>6.3 Third-Party Integrations</h5>
+<p>The HMS may integrate with third-party systems. The team is not responsible for issues arising from the use of such integrations.</p>
 
-    <h5>6.3 Third-Party Integrations</h5>
-    <p>The HMS may integrate with third-party systems. The team is not responsible for issues arising from the use of such integrations.</p>
+<h5>7. Termination of Access</h5>
+<h5>7.1 Breach of Terms</h5>
+<p>The HMS reserves the right to terminate access to users who violate these terms.</p>
 
-    <h5>7. Termination of Access</h5>
-    <h5>7.1 Breach of Terms</h5>
-    <p>The HMS reserves the right to terminate access to users who violate these terms.</p>
+<h5>7.2 User-Initiated Termination</h5>
+<p>Users may request account termination by contacting the Admin team. Upon termination, access to system functionalities will be revoked.</p>
 
-    <h5>7.2 User-Initiated Termination</h5>
-    <p>Users may request account termination by contacting the Admin team. Upon termination, access to system functionalities will be revoked.</p>
+<h5>8. Changes to Terms and Conditions</h5>
+<p>The HMS team may update these terms periodically. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the revised terms.</p>
 
-    <h5>8. Changes to Terms and Conditions</h5>
-    <p>The HMS team may update these terms periodically. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the revised terms.</p>
+<h5>9. Contact Information</h5>
+<p>For any questions or concerns regarding these terms, please contact the hospital's administration team at <a href="mailto:contact@hospital.com">info@globalhospitals.com</a>.</p>
 
-    <h5>9. Contact Information</h5>
-    <p>For any questions or concerns regarding these terms, please contact the hospital's administration team at <a href="mailto:contact@hospital.com">contact@hospital.com</a>.</p>
+<p>By using the Hospital Management System, you acknowledge that you have read, understood, and agree to these terms and conditions.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <p>By using the Hospital Management System, you acknowledge that you have read, understood, and agree to these terms and conditions.</p>
-
-	<h4>Data Policy</h4>
-    <p><strong>Introduction</strong><br>The Hospital Management System (HMS) respects the privacy and security of all users' data. This Data Policy outlines how data is collected, stored, used, shared, and protected within the system. By using the HMS, you agree to this Data Policy.</p>
+<!-- Data Policy Modal -->
+<div class="modal fade" id="dataPolicyModal" tabindex="-1" aria-labelledby="dataPolicyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataPolicyModalLabel">Data Policy</h5>
+            </div>
+            <div class="modal-body">
+                <div class="data-policy">
+                <h4>Data Policy</h4>
+    <p>The Hospital Management System (HMS) respects the privacy and security of all users' data. This Data Policy outlines how data is collected, stored, used, shared, and protected within the system. By using the HMS, you agree to this Data Policy.</p>
 
     <h5>1. Data Collection</h5>
     <h5>1.1 Types of Data Collected</h5>
     <ul>
-        <li><strong>Personal Information:</strong> Includes name, contact details, date of birth, address, and other personal identifiers.</li>
-        <li><strong>Health Records:</strong> Includes medical history, prescriptions, test results, diagnoses, and treatment plans.</li>
+        <li><strong>Personal Information:</strong> Includes name, contact details, email address, and other personal identifiers.</li>
+        <li><strong>Health Records:</strong> Includes medical history, prescriptions, and treatment plans.</li>
         <li><strong>Financial Information:</strong> Includes payment details for services (if applicable).</li>
     </ul>
 
@@ -591,32 +605,29 @@
     <p>The HMS reserves the right to modify this Data Policy at any time. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the updated policy.</p>
 
     <h5>11. Contact Information</h5>
-    <p>For questions or concerns regarding this Data Policy, please contact the HMS support team at <a href="mailto:support@hospital.com">support@hospital.com</a>.</p>
+    <p>For questions or concerns regarding this Data Policy, please contact the HMS support team at <a href="mailto:support@hospital.com">info@globalhospitals.com</a>.</p>
 
     <p>By using the Hospital Management System, you acknowledge that you have read, understood, and agree to this Data Policy.</p>
-</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-    .terms-conditions {
+    .terms-conditions, .data-policy {
         font-family: Arial, sans-serif;
         line-height: 1.6;
         color: #333;
     }
-    .terms-conditions h1, .terms-conditions h2 {
+    .terms-conditions h5, .data-policy h5 {
         color: #2c3e50;
         margin-top: 20px;
     }
-    .terms-conditions h3 {
-        color: #34495e;
-        font-weight: bold;
-        margin-top: 10px;
-    }
-    .terms-conditions ul {
-        list-style-type: disc;
-        padding-left: 20px;
-    }
-    .terms-conditions p, .terms-conditions li {
+    .terms-conditions p, .data-policy p {
         margin-bottom: 10px;
     }
 </style>
