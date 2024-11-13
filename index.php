@@ -23,6 +23,10 @@
 	</style>
 	<script src="https://www.google.com/recaptcha/api.js" async defer></script> <!-- reCAPTCHA API -->
 	<script>
+		function openResetPasswordModal() {
+			$('#resetPasswordModal').modal('show');
+		}
+
 		function checkPasswordRequirements() {
 			const password = document.getElementById("password").value;
 			const requirements = {
@@ -226,7 +230,7 @@
 											</label>
 										</div>
 										<a href="index1.php">Already have an account?</a>
-										<a href="javascript:void(0);" onclick="openResetPasswordModal()">Forgot Password?</a>
+										<a href="resetpassword.html">Forgot Password?</a>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -322,12 +326,6 @@
     </div>
 </div>
 
-<script>
-function openResetPasswordModal() {
-    $('#resetPasswordModal').modal('show');
-}
-
-</script>
 
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
