@@ -140,30 +140,8 @@ if (isset($_POST['docsub'])) {
   }
 }
 
-if(isset($_POST['docsub1']))
-{
-  $demail=$_POST['demail'];
-  $query="delete from doctb where email='$demail';";
-  $result=mysqli_query($con,$query);
-  if($result)
-    {
-      echo "<script>alert('Doctor removed successfully!');</script>";
-      $activity = "Doctor removed: $doctorName";
-      $encryptedActivity = encryptData($activity); 
-
-      date_default_timezone_set('Asia/Kuala_Lumpur'); 
-      $created_on = date('Y-m-d H:i:s'); 
-      $logQuery = "
-          INSERT INTO activity_log (activity, activity_iv, created_on, admin) 
-          VALUES ('{$encryptedActivity['data']}', '{$encryptedActivity['iv']}', '$created_on', '{$_SESSION['username']}')";
-      $logResult = mysqli_query($con, $logQuery);
-
-      if (!$logResult) {
-          echo "<script>alert('Failed to record activity log.');</script>";
-      }
-  } else {
-      echo "<script>alert('Unable to delete!');</script>";
-  }
+if (isset($_POST['docsub1'])) {
+  // delete here
 }
 
 ?>
@@ -386,105 +364,110 @@ if(isset($_POST['docsub1']))
               </div>
             </div>
 
-    <div class="tab-pane fade" id="list-doc" role="tabpanel" aria-labelledby="list-home-list">
-              
-
+            <div class="tab-pane fade" id="list-doc" role="tabpanel" aria-labelledby="list-home-list">
     <div class="col-md-8">
         <input type="text" id="filterDoctorInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterDoctorTable()">
     </div>
-            <table class="table table-hover" id="doctorTable" style="margin-top: 20px;">
-            <thead>
-                <tr>
-                    <th scope="col">Doctor Name</th>
-                    <th scope="col">Specialization</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Fees</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $con = mysqli_connect("localhost", "root", "", "myhmsdb");
-                if (!$con) {
-                    die("Connection failed: " . mysqli_connect_error());
-                }
+    <table class="table table-hover" id="doctorTable" style="margin-top: 20px;">
+        <thead>
+            <tr>
+                <th scope="col">Doctor Name</th>
+                <th scope="col">Specialization</th>
+                <th scope="col">Email</th>
+                <th scope="col">Fees</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+            if (!$con) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
 
-                $query = "SELECT username, spec, spec_iv, email, email_iv, docFees, doc_Fees_iv FROM doctb";
-                $result = mysqli_query($con, $query);
+            $query = "SELECT doc_id, username, spec, spec_iv, email, email_iv, docFees, doc_Fees_iv FROM doctb";
+            $result = mysqli_query($con, $query);
 
-                while ($row = mysqli_fetch_array($result)) {
-                    // Decrypt the necessary fields
-                    $username = $row['username']; // Not encrypted
-                    $decryptedSpec = decryptData($row['spec'], $row['spec_iv']);
-                    $decryptedEmail = decryptData($row['email'], $row['email_iv']);
-                    $decryptedDocFees = decryptData($row['docFees'], $row['doc_Fees_iv']);
+            while ($row = mysqli_fetch_array($result)) {
+                $docId = $row['doc_id']; // Retrieve the doctor ID
+                $username = $row['username'];
+                $decryptedSpec = decryptData($row['spec'], $row['spec_iv']);
+                $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                $decryptedDocFees = decryptData($row['docFees'], $row['doc_Fees_iv']);
 
-                    echo "<tr>
-                        <td>$username</td>
-                        <td>$decryptedSpec</td>
-                        <td>$decryptedEmail</td>
-                        <td>$decryptedDocFees</td>
-                    </tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+                echo "<tr>
+                    <td><input type='hidden' class='doc-id' value='$docId'>$username</td>
+                    <td contenteditable='false'>$decryptedSpec</td>
+                    <td contenteditable='false'>$decryptedEmail</td>
+                    <td contenteditable='false'>$decryptedDocFees</td>
+                    <td>
+                        <button class='btn btn-sm btn-primary edit-button'><i class='fas fa-edit'></i></button>
+                        <button class='btn btn-sm btn-success save-button' style='display: none;'><i class='fas fa-save'></i></button>
+                    </td>
+                </tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+ 
 
-        <br>
-      </div>
-    
-
-    <div class="tab-pane fade" id="list-pat" role="tabpanel" aria-labelledby="list-pat-list">
-
+<div class="tab-pane fade" id="list-pat" role="tabpanel" aria-labelledby="list-pat-list">
     <div class="col-md-8">
         <input type="text" id="filterPatientInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPatientTable()">
     </div>
-          <table class="table table-hover" id="patientTable" style="margin-top: 20px;">
-          <thead>
-              <tr>
-                  <th scope="col">Patient ID</th>
-                  <th scope="col">First Name</th>
-                  <th scope="col">Last Name</th>
-                  <th scope="col">Gender</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Contact</th>
-              </tr>
-          </thead>
-          <tbody>
-              <?php 
-              $con = mysqli_connect("localhost", "root", "", "myhmsdb");
-              if (!$con) {
-                  die("Connection failed: " . mysqli_connect_error());
-              }
+    <table class="table table-hover" id="patientTable" style="margin-top: 20px;">
+        <thead>
+            <tr>
+                <th scope="col">Patient ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Email</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+            if (!$con) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
 
-              $query = "SELECT pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv FROM patreg";
-              $result = mysqli_query($con, $query);
+            $query = "SELECT pid, fname, lname, gender, gender_iv, email, email_iv, contact, contact_iv FROM patreg";
+            $result = mysqli_query($con, $query);
 
-              while ($row = mysqli_fetch_array($result)) {
-                  // Decrypt the necessary fields
-                  $pid = $row['pid'];
-                  $fname = $row['fname'];
-                  $lname = $row['lname'];
-                  $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
-                  $decryptedEmail = decryptData($row['email'], $row['email_iv']);
-                  $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
-            
+            while ($row = mysqli_fetch_array($result)) {
+                // Decrypt the necessary fields
+                $pid = $row['pid'];
+                $fname = $row['fname'];
+                $lname = $row['lname'];
+                $decryptedGender = decryptData($row['gender'], $row['gender_iv']);
+                $decryptedEmail = decryptData($row['email'], $row['email_iv']);
+                $decryptedContact = decryptData($row['contact'], $row['contact_iv']);
 
-                  echo "<tr>
-                      <td>$pid</td>
-                      <td>$fname</td>
-                      <td>$lname</td>
-                      <td>$decryptedGender</td>
-                      <td>$decryptedEmail</td>
-                      <td>$decryptedContact</td>
-                    
-                  </tr>";
-              }
-              ?>
-          </tbody>
-      </table>
-
-        <br>
-      </div>
+                echo "<tr id='row-$pid'>
+                    <td>$pid</td>
+                    <td contenteditable='false' id='fname-$pid'>$fname</td>
+                    <td contenteditable='false' id='lname-$pid'>$lname</td>
+                    <td>$decryptedGender</td>
+                    <td contenteditable='false' id='email-$pid'>$decryptedEmail</td>
+                    <td contenteditable='false' id='contact-$pid'>$decryptedContact</td>
+                    <td>
+                        <button class='btn btn-sm btn-primary edit-button' onclick='enableEdit($pid)'>
+                            <i class='fas fa-edit'></i>
+                        </button>
+                        <button class='btn btn-success btn-sm' style='display:none;' id='save-btn-$pid' onclick='savePatient($pid)'>
+                            <i class='fas fa-save'></i>
+                        </button>
+                    </td>
+                </tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
 
       <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
 
@@ -598,7 +581,7 @@ if(isset($_POST['docsub1']))
                   <div class="col-md-8"><input type="email"  class="form-control" name="demail" required></div><br><br>
                   
                 </div>
-          <input type="submit" name="docsub1" value="Delete Doctor" class="btn btn-primary" onclick="confirm('do you really want to delete?')">
+          <input type="submit" name="docsub1" value="Delete Doctor" class="btn btn-primary" onclick="confirm('Do you confirm to delete?')">
         </form>
       </div>
 
@@ -1118,7 +1101,7 @@ function updateDoctorDropdown(doctors) {
 
 			// check if the email already exists in the database
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "check_email.php", true); 
+			xhr.open("POST", "check_emaildoc.php", true); 
 			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			xhr.onreadystatechange = function() {
@@ -1143,6 +1126,101 @@ function updateDoctorDropdown(doctors) {
 			// send the email to the server for checking
 			xhr.send("email=" + encodeURIComponent(email));
 		}
+
+    document.addEventListener('DOMContentLoaded', () => {
+    // Handle Edit button
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const row = this.closest('tr');
+            row.querySelectorAll('td[contenteditable]').forEach(cell => {
+                cell.setAttribute('contenteditable', 'true');
+            });
+
+            this.style.display = 'none'; // Hide Edit button
+            row.querySelector('.save-button').style.display = 'inline-block'; // Show Save button
+        });
+    });
+
+    // Handle Save button
+    document.querySelectorAll('.save-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const row = this.closest('tr');
+            const docId = row.querySelector('.doc-id').value; // Get doc_id from the hidden field
+            const updatedData = {
+                username: row.children[0].innerText,
+                spec: row.children[1].innerText,
+                email: row.children[2].innerText,
+                fees: row.children[3].innerText
+            };
+
+            // Send AJAX request to update the database
+            fetch('update_doctor.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ docId, ...updatedData })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Doctor information updated successfully.');
+                    } else {
+                        alert('Failed to update doctor information.');
+                    }
+                });
+
+            row.querySelectorAll('td[contenteditable]').forEach(cell => {
+                cell.setAttribute('contenteditable', 'false');
+            });
+
+            this.style.display = 'none'; // Hide Save button
+            row.querySelector('.edit-button').style.display = 'inline-block'; // Show Edit button
+        });
+    });
+});
+
+function enableEdit(pid) {
+        // Enable editing for fields
+        document.getElementById(`fname-${pid}`).contentEditable = true;
+        document.getElementById(`lname-${pid}`).contentEditable = true;
+        document.getElementById(`email-${pid}`).contentEditable = true;
+        document.getElementById(`contact-${pid}`).contentEditable = true;
+
+        // Show save button
+        document.getElementById(`save-btn-${pid}`).style.display = 'inline-block';
+    }
+
+    function savePatient(pid) {
+        const fname = document.getElementById(`fname-${pid}`).innerText;
+        const lname = document.getElementById(`lname-${pid}`).innerText;
+        const email = document.getElementById(`email-${pid}`).innerText;
+        const contact = document.getElementById(`contact-${pid}`).innerText;
+
+        fetch('update_patient.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pid, fname, lname, email, contact })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Patient details updated successfully!');
+                // Disable editing after saving
+                document.getElementById(`fname-${pid}`).contentEditable = false;
+                document.getElementById(`lname-${pid}`).contentEditable = false;
+                document.getElementById(`email-${pid}`).contentEditable = false;
+                document.getElementById(`contact-${pid}`).contentEditable = false;
+                document.getElementById(`save-btn-${pid}`).style.display = 'none';
+            } else {
+                alert('Failed to update patient details: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
 </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

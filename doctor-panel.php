@@ -196,7 +196,10 @@ if(isset($_GET['cancel']))
     
 
          <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-home-list">
-    <table class="table table-hover">
+         <div class="col-md-8">
+          <input type="text" id="filterInput" class="form-control" placeholder="Search for any keyword..." onkeyup="filterAppointmentTable()">
+      </div>
+      <table class="table table-hover" id="appointmentTable" style="margin-top: 20px;">
         <thead>
             <tr>
                 <th scope="col">Patient ID</th>
@@ -312,7 +315,10 @@ if(isset($_GET['cancel']))
       
 
       <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
-        <table class="table table-hover">
+      <div class="col-md-8">
+          <input type="text" id="filterInput2" class="form-control" placeholder="Search for any keyword..." onkeyup="filterPresTable()">
+      </div>
+        <table class="table table-hover" id="presTable" style="margin-top: 20px;">
                 <thead>
                   <tr>
                     
@@ -548,6 +554,60 @@ if(isset($_GET['cancel']))
             }
         });
     });
+
+    function filterAppointmentTable() {
+        // get the value entered 
+        const filter = document.getElementById("filterInput").value.toUpperCase();
+        const table = document.getElementById("appointmentTable");
+        const rows = table.getElementsByTagName("tr");
+
+        // loop through table rows and hide rows that don't match the filter
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+            
+            // loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+            
+            // show the row if a match is found
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+
+    function filterPresTable() {
+        // get the value entered 
+        const filter = document.getElementById("filterInput2").value.toUpperCase();
+        const table = document.getElementById("presTable");
+        const rows = table.getElementsByTagName("tr");
+
+        // loop through table rows and hide rows that don't match the filter
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+            
+            // loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+            
+            // show the row if a match is found
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
 </script>
 
 

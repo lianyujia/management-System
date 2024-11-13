@@ -409,7 +409,7 @@ function get_specs(){
    <div class="container-fluid" style="margin-top:50px;">
     <h3 style = "margin-left: 40%;  padding-bottom: 20px; font-family: 'IBM Plex Sans', sans-serif;"> Welcome &nbsp<?php echo $username ?> 
    </h3>
-   <div style="position: absolute; right: 10px; margin-top: -100px;">
+   <div style="position: absolute; left: 10px; margin-top: -100px;">
         <button class="btn btn-primary" style="background-color: #313866;" data-toggle="modal" data-target="#activityLogModal">
             <i class="fas fa-file"></i> History
         </button>
