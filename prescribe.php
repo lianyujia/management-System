@@ -71,14 +71,12 @@ if (
   $doctor = $_SESSION['dname']; 
   $doc_id = $_SESSION['doc_id'];
 
-  // Encrypt sensitive fields
   $encryptedFname = encryptData($fname);
   $encryptedLname = encryptData($lname);
   $encryptedDisease = encryptData($disease);
   $encryptedAllergy = encryptData($allergy);
   $encryptedPrescription = encryptData($prescription);
 
-  // Insert into database with encrypted values
   $query = mysqli_query($con, "INSERT INTO prestb (
       doctor,
       pid,
@@ -122,11 +120,6 @@ if ($query) {
 }
 
 
-
-  // else{
-  //   echo "<script>alert('GET is not working!');</script>";
-  // }initial
-  // enga error?
 }
 
 ?>
@@ -140,7 +133,6 @@ if ($query) {
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
     <meta name="viewport" content="width=device-width, -scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="style.css">
     <!-- Bootstrap CSS -->
     
         <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
