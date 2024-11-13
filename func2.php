@@ -90,6 +90,17 @@ if (isset($_POST['patsub1'])) {
           $_SESSION['pid'] = $pid;
           $pid_stmt->close();
 
+          $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+          $csrf_token = $_SESSION['csrf_token'];
+
+          // Use pid for updating csrf_token
+          $update_query = "UPDATE patreg SET csrf_token='$csrf_token' WHERE pid=?";
+          $update_stmt = $con->prepare($update_query);
+          $update_stmt->bind_param("i", $pid);
+          $update_stmt->execute();
+          $update_stmt->close();
+
           // Redirect to admin panel with success message
           echo "<script>
               alert('Patient registered successfully!');

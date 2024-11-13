@@ -314,6 +314,10 @@ if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
   $obj_pdf->SetFont('helvetica', '', 12);
   $obj_pdf->AddPage();
 
+  $user_password = $email . $contact;
+
+  $obj_pdf->SetProtection(['print', 'copy'], $user_password);
+
   // Fetch content for the specific appointment ID
   $content = '';
   $content .= '
