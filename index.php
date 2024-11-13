@@ -381,7 +381,247 @@
             </div>
             <div class="modal-body">
                 <h6>Terms and Conditions</h6>
-                <p>Put your detailed terms and conditions content here.</p>
+                <div class="terms-conditions">
+
+    <p><strong>Welcome to the Hospital Management System (HMS).</strong> These terms and conditions govern your use of the platform. By accessing or using the HMS, you agree to abide by these terms. If you do not agree, please refrain from using the system.</p>
+
+    <h5>1. General Terms</h5>
+    <h5>1.1 Authorized Use</h5>
+    <p>All users must use the system solely for purposes related to hospital operations, including appointment management, medical record maintenance, and administrative functions.</p>
+
+    <h5>1.2 Data Privacy and Confidentiality</h5>
+    <p>Users are responsible for safeguarding the privacy of patient data. Unauthorized access, modification, or distribution of sensitive information is strictly prohibited and may result in legal action.</p>
+
+    <h5>1.3 System Updates</h5>
+    <p>The HMS may undergo updates to improve functionality or security. Users agree to adhere to any changes or updated terms that come with such improvements.</p>
+
+    <h5>1.4 Prohibited Activities</h5>
+    <ul>
+        <li>Tampering with system functionality.</li>
+        <li>Misusing data for personal gain.</li>
+        <li>Introducing malicious software or hacking attempts.</li>
+    </ul>
+
+    <h5>1.5 Account Security</h5>
+    <p>Users must maintain the confidentiality of their account credentials. Sharing credentials is strictly prohibited.</p>
+
+    <h5>2. Admin Role</h5>
+    <h5>2.1 Responsibilities</h5>
+    <p>Admins are responsible for managing user accounts, overseeing hospital operations within the system, and ensuring compliance with terms and conditions.</p>
+
+    <h5>2.2 Data Access</h5>
+    <p>Admins have access to all system data but must use this access responsibly and ensure that patient confidentiality is maintained.</p>
+
+    <h5>2.3 User Management</h5>
+    <p>Admins can create, update, or deactivate user accounts (doctors and patients). Actions affecting user accounts must be based on legitimate operational needs.</p>
+
+    <h5>2.4 Audit Obligations</h5>
+    <p>Admins are responsible for monitoring activities within the system and ensuring all users comply with these terms.</p>
+
+    <h5>3. Doctor Role</h5>
+    <h5>3.1 Responsibilities</h5>
+    <p>Doctors are responsible for updating medical records, scheduling appointments, and providing medical care as documented in the system.</p>
+
+    <h5>3.2 Patient Data Management</h5>
+    <p>Doctors must access patient data only for treatment purposes. Sharing or misusing patient information is strictly prohibited.</p>
+
+    <h5>3.3 Appointment Scheduling</h5>
+    <p>Doctors must manage their schedules within the system and adhere to the timings and availability they provide.</p>
+
+    <h5>3.4 Ethical Obligations</h5>
+    <p>Doctors must ensure that all interactions within the HMS align with their professional and ethical standards.</p>
+
+    <h5>4. Patient Role</h5>
+    <h5>4.1 Responsibilities</h5>
+    <p>Patients are responsible for ensuring their account information is accurate and up to date.</p>
+
+    <h5>4.2 Appointment Management</h5>
+    <p>Patients must use the system to book, reschedule, or cancel appointments in a timely manner. Missed appointments may result in restrictions.</p>
+
+    <h5>4.3 Medical Records</h5>
+    <p>Patients can access their own medical records but must not attempt to alter or tamper with them.</p>
+
+    <h5>4.4 Feedback and Complaints</h5>
+    <p>Patients are encouraged to report any issues or provide feedback regarding system functionality or services.</p>
+
+    <h5>5. Data Protection and Security</h5>
+    <h5>5.1 Confidentiality</h5>
+    <p>The system is designed to comply with applicable data protection regulations (e.g., GDPR, HIPAA). All data is encrypted and stored securely.</p>
+
+    <h5>5.2 User Consent</h5>
+    <p>By using the HMS, users consent to the collection, storage, and processing of their personal information for operational purposes.</p>
+
+    <h5>5.3 Data Breach Response</h5>
+    <p>In the event of a data breach, the HMS team will notify affected users promptly and take corrective actions.</p>
+
+    <h5>6. Liability</h5>
+    <h5>6.1 System Downtime</h5>
+    <p>The HMS team strives to provide uninterrupted service but is not liable for downtimes caused by maintenance, technical issues, or unforeseen circumstances.</p>
+
+    <h5>6.2 User Actions</h5>
+    <p>The HMS is not responsible for actions performed by users, such as incorrect data input or misuse of the system.</p>
+
+    <h5>6.3 Third-Party Integrations</h5>
+    <p>The HMS may integrate with third-party systems. The team is not responsible for issues arising from the use of such integrations.</p>
+
+    <h5>7. Termination of Access</h5>
+    <h5>7.1 Breach of Terms</h5>
+    <p>The HMS reserves the right to terminate access to users who violate these terms.</p>
+
+    <h5>7.2 User-Initiated Termination</h5>
+    <p>Users may request account termination by contacting the Admin team. Upon termination, access to system functionalities will be revoked.</p>
+
+    <h5>8. Changes to Terms and Conditions</h5>
+    <p>The HMS team may update these terms periodically. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the revised terms.</p>
+
+    <h5>9. Contact Information</h5>
+    <p>For any questions or concerns regarding these terms, please contact the hospital's administration team at <a href="mailto:contact@hospital.com">contact@hospital.com</a>.</p>
+
+    <p>By using the Hospital Management System, you acknowledge that you have read, understood, and agree to these terms and conditions.</p>
+
+	<h4>Data Policy</h4>
+    <p><strong>Introduction</strong><br>The Hospital Management System (HMS) respects the privacy and security of all users' data. This Data Policy outlines how data is collected, stored, used, shared, and protected within the system. By using the HMS, you agree to this Data Policy.</p>
+
+    <h5>1. Data Collection</h5>
+    <h5>1.1 Types of Data Collected</h5>
+    <ul>
+        <li><strong>Personal Information:</strong> Includes name, contact details, date of birth, address, and other personal identifiers.</li>
+        <li><strong>Health Records:</strong> Includes medical history, prescriptions, test results, diagnoses, and treatment plans.</li>
+        <li><strong>System Usage Data:</strong> Includes login activity, IP addresses, and interactions within the HMS.</li>
+        <li><strong>Financial Information:</strong> Includes payment details for services (if applicable).</li>
+    </ul>
+
+    <h5>1.2 Purpose of Data Collection</h5>
+    <p>Data is collected for the following purposes:</p>
+    <ul>
+        <li>To provide efficient healthcare services.</li>
+        <li>To facilitate appointment scheduling and management.</li>
+        <li>To maintain accurate medical records.</li>
+        <li>To improve system functionality and user experience.</li>
+    </ul>
+
+    <h5>2. Data Usage</h5>
+    <h5>2.1 Purpose</h5>
+    <ul>
+        <li><strong>Admin Role:</strong> For hospital management, user account oversight, and reporting.</li>
+        <li><strong>Doctor Role:</strong> For accessing patient records to provide medical care.</li>
+        <li><strong>Patient Role:</strong> For accessing medical records, booking appointments, and managing healthcare.</li>
+    </ul>
+
+    <h5>2.2 Prohibited Use</h5>
+    <p>Data collected in the HMS cannot be used for:</p>
+    <ul>
+        <li>Personal or non-professional purposes.</li>
+        <li>Advertising, marketing, or sharing with third parties without user consent.</li>
+    </ul>
+
+    <h5>3. Data Sharing</h5>
+    <h5>3.1 Internal Sharing</h5>
+    <ul>
+        <li><strong>Admins:</strong> Have access to all system data for management purposes.</li>
+        <li><strong>Doctors:</strong> Access only patient data relevant to their care responsibilities.</li>
+        <li><strong>Patients:</strong> Access their own medical records and appointment details.</li>
+    </ul>
+
+    <h5>3.2 External Sharing</h5>
+    <p>Data may only be shared with third parties under the following circumstances:</p>
+    <ul>
+        <li><strong>With Consent:</strong> When users authorize the sharing of their data.</li>
+        <li><strong>Legal Obligations:</strong> When required by law or regulatory authorities.</li>
+        <li><strong>Emergency Situations:</strong> To protect a user’s health or safety in critical situations.</li>
+    </ul>
+
+    <h5>4. Data Storage</h5>
+    <h5>4.1 Secure Storage</h5>
+    <ul>
+        <li>All data is encrypted during transmission and at rest.</li>
+        <li>Data is stored on secure servers with restricted access.</li>
+    </ul>
+
+    <h5>4.2 Retention Period</h5>
+    <ul>
+        <li><strong>Patient medical records:</strong> Retained for as long as required by medical record-keeping regulations.</li>
+        <li><strong>User accounts:</strong> Data associated with deleted accounts will be anonymized or deleted based on system policies.</li>
+    </ul>
+
+    <h5>5. Data Access and Control</h5>
+    <h5>5.1 User Rights</h5>
+    <ul>
+        <li><strong>Access:</strong> Users can request access to their data.</li>
+        <li><strong>Correction:</strong> Users can request corrections to inaccurate or incomplete data.</li>
+        <li><strong>Deletion:</strong> Users can request the deletion of their data, subject to legal and operational constraints.</li>
+    </ul>
+
+    <h5>5.2 Role-Based Access</h5>
+    <p>Admins, doctors, and patients have access only to data relevant to their roles. Unauthorized access to sensitive information is strictly prohibited.</p>
+
+    <h5>6. Data Protection</h5>
+    <h5>6.1 Security Measures</h5>
+    <p>Firewalls, encryption, and secure authentication mechanisms protect all data. Regular audits are conducted to identify and address vulnerabilities.</p>
+
+    <h5>6.2 Data Breach Response</h5>
+    <p>Users will be notified promptly in the event of a data breach. Corrective actions will be taken to mitigate risks and prevent recurrence.</p>
+
+    <h5>7. Cookies and Tracking</h5>
+    <h5>7.1 System Cookies</h5>
+    <p>HMS may use cookies to enhance user experience by storing login sessions and preferences. Cookies do not store sensitive information and are used solely for functionality purposes.</p>
+
+    <h5>7.2 Opt-Out</h5>
+    <p>Users may disable cookies through their browser settings, but this may impact the system’s functionality.</p>
+
+    <h5>8. Third-Party Services</h5>
+    <h5>8.1 Integration</h5>
+    <p>The HMS may integrate with third-party tools (e.g., payment gateways or SMS notification services). Only essential data will be shared with these services under strict confidentiality agreements.</p>
+
+    <h5>8.2 Disclaimer</h5>
+    <p>The HMS is not responsible for data misuse by third-party providers beyond our control.</p>
+
+    <h5>9. Compliance</h5>
+    <h5>9.1 Regulations</h5>
+    <p>The HMS complies with relevant data protection laws, including:</p>
+    <ul>
+        <li>General Data Protection Regulation (GDPR)</li>
+        <li>Health Insurance Portability and Accountability Act (HIPAA)</li>
+        <li>Personal Data Protection Act (PDPA)</li>
+    </ul>
+
+    <h5>9.2 User Responsibility</h5>
+    <p>Users are responsible for ensuring their actions within the system comply with this Data Policy.</p>
+
+    <h5>10. Policy Updates</h5>
+    <p>The HMS reserves the right to modify this Data Policy at any time. Users will be notified of significant changes, and continued use of the system constitutes acceptance of the updated policy.</p>
+
+    <h5>11. Contact Information</h5>
+    <p>For questions or concerns regarding this Data Policy, please contact the HMS support team at <a href="mailto:support@hospital.com">support@hospital.com</a>.</p>
+
+    <p>By using the Hospital Management System, you acknowledge that you have read, understood, and agree to this Data Policy.</p>
+</div>
+</div>
+
+<style>
+    .terms-conditions {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+    }
+    .terms-conditions h1, .terms-conditions h2 {
+        color: #2c3e50;
+        margin-top: 20px;
+    }
+    .terms-conditions h3 {
+        color: #34495e;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .terms-conditions ul {
+        list-style-type: disc;
+        padding-left: 20px;
+    }
+    .terms-conditions p, .terms-conditions li {
+        margin-bottom: 10px;
+    }
+</style>
+
            
             </div>
             <div class="modal-footer">
