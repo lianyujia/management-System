@@ -87,7 +87,8 @@ if (
       apptime,
       disease, disease_iv,
       allergy, allergy_iv,
-      prescription, prescription_iv
+      prescription, prescription_iv,
+      appdate_iv, apptime_iv
   ) VALUES (
       '$doctor',
       '$pid',
@@ -98,7 +99,8 @@ if (
       '$apptime',      
       '{$encryptedDisease['data']}', '{$encryptedDisease['iv']}',
       '{$encryptedAllergy['data']}', '{$encryptedAllergy['iv']}',
-      '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}'
+      '{$encryptedPrescription['data']}', '{$encryptedPrescription['iv']}',
+      '$appdate', '$apptime'
   )");
 
 if ($query) {
@@ -115,6 +117,7 @@ if ($query) {
   } else {
       echo "<script>alert('Prescribed successfully!');</script>";
   }
+  echo "<script>alert('Prescription saved but failed to log activity.');</script>";
 } else {
   echo "<script>alert('Unable to process your request. Try again!');</script>";
 }

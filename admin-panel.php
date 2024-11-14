@@ -208,6 +208,8 @@ if (isset($_POST['app-submit'])) {
               } else {
                   echo "<script>alert('Appointment booked but failed to log activity. Please contact support.');</script>";
               }
+
+              echo "<script>alert('Your appointment has been successfully booked!');</script>";
           } else {
               echo "<script>alert('Unable to process your request. Please try again!');</script>";
           }
@@ -244,7 +246,7 @@ function generate_bill($appointmentId) {
       return;
   }
 
-  // fetch data for the specific appointment ID
+  // Fetch data for the specific appointment ID
   $query = "
       SELECT 
           p.doctor,
@@ -253,7 +255,8 @@ function generate_bill($appointmentId) {
           a.apptime, a.apptime_iv,
           p.disease, p.disease_iv,
           p.allergy, p.allergy_iv,
-          p.prescription, p.prescription_iv
+          p.prescription, p.prescription_iv,
+          p.status
       FROM prestb p
       JOIN appointmenttb a ON p.ID = a.ID
       WHERE p.ID = '$appointmentId';
@@ -286,8 +289,17 @@ function generate_bill($appointmentId) {
       ';
   }
 
+  // Update the status to 'Paid'
+  $updateStatusQuery = "UPDATE prestb SET status = 'Paid' WHERE ID = '$appointmentId';";
+  if (!mysqli_query($con, $updateStatusQuery)) {
+      echo "Error updating status: " . mysqli_error($con);
+      return;
+  }
+
+  mysqli_close($con);
   return $output;
 }
+
 
 
 if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
@@ -313,7 +325,7 @@ if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
   $obj_pdf->SetFont('helvetica', '', 12);
   $obj_pdf->AddPage();
 
-  // fetch content for the specific appointment ID
+  // Fetch content for the specific appointment ID
   $content = '';
   $content .= '
       <br/>
@@ -323,6 +335,11 @@ if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
   $content .= generate_bill($appointmentId); // pass the appointment ID to the function
 
   $obj_pdf->writeHTML($content);
+
+  // Set a password for the PDF
+  $userPassword = "123"; // replace with desired password
+  $obj_pdf->SetProtection(array('print', 'copy'), $userPassword);
+
   ob_end_clean();
   $obj_pdf->Output("bill.pdf", 'I');
 }
@@ -710,78 +727,86 @@ function get_specs(){
 
 
 
-      <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
-        
-              <table class="table table-hover" id="presTable">
-                <thead>
-                  <tr>
-                    
-                    <th scope="col">Doctor Name</th>
-                    <th scope="col">Appointment ID</th>
-                    <th scope="col">Appointment Date</th>
-                    <th scope="col">Appointment Time</th>
-                    <th scope="col">Diseases</th>
-                    <th scope="col">Allergies</th>
-                    <th scope="col">Prescriptions</th>
-                    <th scope="col">Bill Payment</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php 
+<div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
+    <table class="table table-hover" id="presTable">
+        <thead>
+            <tr>
+                <th scope="col">Doctor Name</th>
+                <th scope="col">Appointment ID</th>
+                <th scope="col">Appointment Date</th>
+                <th scope="col">Appointment Time</th>
+                <th scope="col">Diseases</th>
+                <th scope="col">Allergies</th>
+                <th scope="col">Prescriptions</th>
+                <th scope="col">Bill Payment</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+                $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
+                if (!$con) {
+                    die("Connection failed: " . mysqli_connect_error());
+                }
 
-                    $query = "SELECT 
-                    p.doctor,
-                    p.ID,
-                    a.appdate, a.appdate_iv, 
-                    a.apptime, a.apptime_iv, 
-                    p.disease, p.disease_iv, 
-                    p.allergy, p.allergy_iv, 
-                    p.prescription, p.prescription_iv 
-                  FROM prestb p
-                  JOIN appointmenttb a ON p.ID = a.ID
-                  WHERE p.pid = '$pid';";
-    
-                  $result = mysqli_query($con, $query);
-                  if (!$result) {
-                      echo mysqli_error($con);
-                  }
-              
-                  while ($row = mysqli_fetch_array($result)) {
-                      $_SESSION['ID'] = $row['ID'];
-               
-                      $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
-                      $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
-                      $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
-                      $decryptedAllergy = decryptData($row['allergy'], $row['allergy_iv']);
-                      $decryptedPrescription = decryptData($row['prescription'], $row['prescription_iv']);
-                  ?>
-                      <tr>
-                          <td><?php echo htmlspecialchars($row['doctor']); ?></td>
-                          <td><?php echo htmlspecialchars($row['ID']); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedDisease); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
-                          <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
+                $query = "
+                    SELECT 
+                        p.doctor,
+                        p.ID,
+                        a.appdate, a.appdate_iv, 
+                        a.apptime, a.apptime_iv, 
+                        p.disease, p.disease_iv, 
+                        p.allergy, p.allergy_iv, 
+                        p.prescription, p.prescription_iv,
+                        p.status
+                    FROM prestb p
+                    JOIN appointmenttb a ON p.ID = a.ID
+                    WHERE p.pid = '$pid';
+                ";
+
+                $result = mysqli_query($con, $query);
+
+                if (!$result) {
+                    echo mysqli_error($con);
+                }
+
+                while ($row = mysqli_fetch_array($result)) {
+                    $_SESSION['ID'] = $row['ID'];
+
+
+                    $appointmentId = $row['ID'];
+                    $decryptedAppDate = decryptData($row['appdate'], $row['appdate_iv']);
+                    $decryptedAppTime = decryptData($row['apptime'], $row['apptime_iv']);
+                    $decryptedDisease = decryptData($row['disease'], $row['disease_iv']);
+                    $decryptedAllergy = decryptData($row['allergy'], $row['allergy_iv']);
+                    $decryptedPrescription = decryptData($row['prescription'], $row['prescription_iv']);
+                    $status = $row['status'];
+            ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['doctor']); ?></td>
+                        <td><?php echo htmlspecialchars($row['ID']); ?></td>
+                        <td><?php echo htmlspecialchars($decryptedAppDate); ?></td>
+                        <td><?php echo htmlspecialchars($decryptedAppTime); ?></td>
+                        <td><?php echo htmlspecialchars($decryptedDisease); ?></td>
+                        <td><?php echo htmlspecialchars($decryptedAllergy); ?></td>
+                        <td><?php echo htmlspecialchars($decryptedPrescription); ?></td>
                         <td>
-                        <form method="get" action="payment-details.php">                      
+                        <?php if ($status == 'Paid') { ?>
+                            <!-- Display "Print Receipt" button if status is Paid -->
+                            <button type="button" class="btn btn-primary" onclick="openReceiptModal('<?php echo $row['ID']; ?>')">Print Receipt</button>
+                        <?php } else { ?>
+                            <!-- Display "Pay Bill" button if status is Not Paid -->
                             <button type="button" onclick="openPaymentModal('<?php echo $row['ID']; ?>')" class="btn btn-success">Pay Bill</button>
-                        </td>
-
-                      </form>
-
-
-                    
-                      </tr>
-                    <?php }
-                    ?>
-                </tbody>
-              </table>
-        <br>
-      </div>
+                        <?php } ?>
+                      </td>
+                    </tr>
+            <?php 
+                } 
+            ?>
+        </tbody>
+    </table>
+    <br>
+</div>
              
 
 
@@ -846,6 +871,25 @@ function get_specs(){
     </div>
 </div>
 
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1" role="dialog" aria-labelledby="receiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="receiptModalLabel">Receipt Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Receipt details for appointment ID: <span id="receiptAppointmentId"></span></p>
+                <!-- Include any specific receipt details here -->
+                <button type="button" class="btn btn-primary" onclick="downloadReceipt()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -895,11 +939,21 @@ function get_specs(){
 
     // show the modal
     $('#paymentModal').modal('show');
-}
+  }
 
-function closePaymentModal() {
-    $('#paymentModal').modal('hide');
-}
+  function closePaymentModal() {
+      $('#paymentModal').modal('hide');
+  }
+
+  function openReceiptModal(appointmentId) {
+    document.getElementById('receiptAppointmentId').textContent = appointmentId;
+    $('#receiptModal').modal('show');
+  }
+
+  function downloadReceipt() {
+      // Use JavaScript to initiate PDF download
+      window.location.href = 'admin-panel.php?credit_card=01&expiry=01&cvv=01&appointment_id=' + document.getElementById('receiptAppointmentId').textContent + "&generate_bill=true";
+  }
 
 // trigger modal close when clicking outside the modal
 window.onclick = function(event) {
