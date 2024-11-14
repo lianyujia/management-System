@@ -80,20 +80,14 @@ if (isset($_POST['adsub'])) {
                     activity, activity_iv, 
                     admin, 
                     login, login_iv, 
-                    created_on, 
-                    pid, 
-                    doc_id,
-                    logout,
-                    logout_iv
+                    created_on
                 ) VALUES (
                     '" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "',
                     '$username',
                     '" . $encryptedLoginTime['data'] . "', '" . $encryptedLoginTime['iv'] . "',
-                    NOW(),
-                    0, 0, 0, 0
+                    NOW()
                 )
             ";
-
 
             if (mysqli_query($con, $logQuery)) {
                 // Logged successfully
