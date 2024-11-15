@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 15, 2024 at 04:45 AM
+-- Generation Time: Nov 15, 2024 at 10:45 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -231,7 +231,6 @@ INSERT INTO `activity_log` (`log_id`, `activity`, `pid`, `doc_id`, `activity_iv`
 (208, 'XuzXdHe/2tykwD+8iPetTsVEq9yjU5wz9+m2QYexuRI=', 0, 0, 'hFvnQZMKcZcFjUHkfhnlxQ==', '2024-11-14 23:57:46', 'admin', '', '', '', ''),
 (209, 'rm/70AOXftGFwgEzlNLojOeciITZHBArEWGyL8zDzIc=', 0, 0, 'j/IK+VKv2YHQZe2aPbYeEQ==', '2024-11-14 23:58:00', 'admin', '', '', '', ''),
 (210, 'hdhgflPK484IZ+B5z7IfQ4y3v/2DN2CK8Imw8Rlto9o=', 0, 0, 'RyaG3CkKD4lUmdmhX6Vu0w==', '2024-11-14 23:59:33', 'admin', '', '', '', ''),
-(211, 'bu3nD1HL3LTFaunDONc16g==', 0, 0, '+fdNIIKJfuabtKy6kHWrYw==', '2024-11-15 11:03:46', 'admin', 'OrKiLzYZsxMMoCDjd8pQ+6+3XU27KWnNlX2URRt6Ihc=', 'AP1dW8z/t/s9rLhBP3IFfg==', '0', '0'),
 (212, 'UiKh6XHocbAvFEETfS7D3PuA8OiSuhLlMrMkoP20QHU=', 0, 0, '1oXRGrBdWqlYzfzwS49iyg==', '2024-11-15 11:05:38', 'admin', '', '', '', ''),
 (213, 'FDLlZ3pWG6BPufrdhNrIZ7TD2N8ZfFcK+c0iikdUsS0=', 0, 0, 'iDWGDkWhUpmR339OsddVdA==', '2024-11-15 11:06:00', 'admin', '', '', '', ''),
 (214, '9Tf29NqFkOlcbyCZBbB0tnaC3O19ykZI6gfNL6ghM9Q=', 0, 0, 'Zk/4vZWpViDCJ64IJDPveQ==', '2024-11-15 11:06:12', 'admin', '', '', '', ''),
@@ -242,9 +241,22 @@ INSERT INTO `activity_log` (`log_id`, `activity`, `pid`, `doc_id`, `activity_iv`
 (219, '9nIi3b8Y2xDsHyc8PIpSvpRalGN1YwjqyXxJ4opsptXhFI5Zp8QZ7xxQcWt3xpskEV+/gTqj2022xkU6hbNLcg==', 19, 11, 'ilOTm6/I+I8SuJuRmzvBPA==', '2024-11-15 11:10:55', '', '', '', '', ''),
 (220, 'Z0Jfzud6ZS86qVMi6ck4SLTWBnbKhzjCdN01MyMXXGzxfEQAf2AvsNmbqcB/ptizT1rEhwpN3on/bf6f8m51a6ZH83lxO0blKjzuIeqUUB0=', 19, 10, 'Bjm5sVk2NHV63EO+b1Wt1g==', '2024-11-15 11:11:07', '', '', '', '', ''),
 (221, 'nNaUCmDV3xe4vlUMUavPxOaGtsKZGtuSOpY2BxB+cVjL1uPrkWXBFuRgMv8M5cUHPgjHbdZLlKAu4D37DD2nOAAmkW5tQB6Vjy/HHI8YlTE=', 19, 12, 'n9mcNmY44XuVF+NJmJ74ow==', '2024-11-15 11:11:51', '', '', '', '', ''),
-(222, 'sr3xIaIqFW5uaSbgeGMpsA==', 0, 0, 'A1wQXJ3Xj4Jp7OjH1O77mg==', '2024-11-15 11:12:21', 'admin', 'f9NOvGlsfeYdoam3we67h/pFyHfQ+3sJDUcYosG4+ks=', 'PB16yqODTnsi8v/dT5MVRg==', '0', '0'),
 (223, '+QfmwVX+jJq9i3Rt+vSnPt2VefxeATVlUWfev2RDxZBuRIWyW6kuquW3cnST2uztHq/jRR508nrPCvjo85WAnmRz+OiGf5EiDgSaf0wzLDs=', 0, 0, 'LB7tCA7Qg/yweM9MXDCdyw==', '2024-11-15 11:13:53', 'admin', '', '', '', ''),
-(224, 'GV/L3XlZe8ePLwgRJ56TG4fsC5c7pNRy0bNn54SxkME=', 0, 23, 'vG6becBBFmzYXrSM9DBd8g==', '2024-11-15 11:15:11', '', 'PQ0r8NdnmjzZVDdYiEKWv45xpbWRNquC530NNewa0f0=', 'JSy0In9W0m/1UuPBTixxJw==', '', '');
+(224, 'GV/L3XlZe8ePLwgRJ56TG4fsC5c7pNRy0bNn54SxkME=', 0, 23, 'vG6becBBFmzYXrSM9DBd8g==', '2024-11-15 11:15:11', '', 'PQ0r8NdnmjzZVDdYiEKWv45xpbWRNquC530NNewa0f0=', 'JSy0In9W0m/1UuPBTixxJw==', '', ''),
+(225, 'BHvfiJlVEfM10nmjj4Oip6d8oUzt8Hc8Tg3YRn4tIl8SrGqZO5qht/nlN8X6CFg8u1BCDdkHeReKggfMwcDRXounjG3Gc8wKv/M5rHyZUEs=', 31, 11, 'rUx6EchF1SK8bXkVVGScqg==', '2024-11-15 17:02:01', '', '', '', '', ''),
+(226, 'Pp9xI9KRbkdHZnzYNury9f0Sdu/98hW7ShxWgqPzUWw=', 31, 0, 'cbcQkcpQFz/ORR+fKunPCQ==', '2024-11-15 17:02:25', '', '44EqK29eD90jqi917qyNUIgf5VHZ8FuKE/2z+Y91D6Q=', 'TAJOUPwwnqQd7onfJ8lUJw==', '', ''),
+(228, 'tuTjJ0fZQZjVz3wqpFzSxQ==', 0, 0, 'oyRHIfD4WZQggtI1ApWrxw==', '2024-11-15 17:07:00', 'admin', 'qMIpliFxSKI2KgZKze/MGGKKg+mFYYZJ0BdwL3ohtjg=', 'cTdBIyQSd0/S//YIwtcsKw==', '', ''),
+(229, 'RO0uaqwwIhn7Lz31ziORWQ==', 0, 0, '9zOPgZLRg3knGIcUah/yzA==', '2024-11-15 17:09:42', 'admin', 'eD5EdFfk8uEBLJWtt1XwQ9sIQ+CBH0trDpdap60eMEQ=', 'WnHiLPyurt52I9A6mkEEFA==', '', ''),
+(230, '3JGABVR+gO5TGLL7Yagpxg==', 0, 0, 'MAYH92Nl+dI/5o7kO4NuRw==', '2024-11-15 17:12:49', 'admin', 'jhAoFaFM2z8KB80cO1laKBexMA0mmbqNlSUOizEH3uo=', 'q3+t4Zhs2PpQ5JrehOkL0A==', '', ''),
+(231, 'PO6H+NmSk8HKjfF7/ik1WA==', 0, 0, 'CCXwXHAmU928pqlwj52Ivw==', '2024-11-15 17:17:25', 'admin', 'hDrJMTGFr7B+re1Tv1x7KkzNMvIFHB7jo1gaoxkXncc=', '98abi7Ahoa0Y9vCgMTXBxw==', '7vodrl9c+9ioKjuqgmmfIBw9q61S2XEKmjLLo8XQFCo=', 'lnspAIyQYfs9DlSVli0d5Q=='),
+(232, 'E5gRE40QOFZ6XZJ7OpSFCg==', 0, 0, 'vME/qeb8XDOqjRrWJjl5QA==', '2024-11-15 17:18:29', 'admin', '+ITyrSgcrSfky1oDRWWHYJMpY/RRLtBGFJSpa456z8k=', 'fnTL5E3lFAaF+qaIBLKnew==', 'MziliffMZrgO+RkypGhfTcE+H/Lq7RLTJbcP0rFV/fA=', 'qKRKiGPezOtRyDVFMrZwog=='),
+(233, '0dYO14lwTRuyfEPEkub6uRQma4euUZN1wp/cDyi0cwk=', 19, 0, 'dW5Yr5aD+e2VqtFQl84PtA==', '2024-11-15 17:24:12', '', 'Oo/4ueIouSFJZl/6G0ybkaUdkJuE60+FwBbFPDaiky0=', '+q+PHA5YbApDZ6KdiPbDXA==', 'dFlPdRU1qpaE+s4L5GkqChk2CdQrcDfqienX/Z4fF88=', 'pGe/qxeT/4LIxDjFscpLCQ=='),
+(234, 'NVAbF4QRj75wMJIh8T3T7c8iHhFp1FCIWuG5BAyrtuI=', 19, 0, '9nLYemTtbDRPNcE1gOtR2g==', '2024-11-15 17:26:01', '', 'ccpGa6ev94WIHJY7eqLOr5TwbnYHqFgMUh8TsOj59UM=', 'Z6ztgUlidxtMaLD/VyMtng==', 'qMUZ3qVlzgmUkKSZ9+SF+RqSP/DYosVz8T7bs9G9qzk=', 'AkkoQ5ZFKkr2PRGnSF14YQ=='),
+(235, 'lW6y06bTZC05jxV9We+hOQMAsOlFBuu1Lf40FSAmpPI=', 0, 11, 'lagsBmfsDX1314awl8SKLA==', '2024-11-15 17:26:48', '', 'tvrn5qIELpDv971VvyWyPB6/xdfG0yTB5j0tuSl9Zso=', 'l8dvE+Sks2o35Cuf8HqKbg==', 'dc0vYnxvJao5vL6qh5DtQQ40nqujaaMnSf7O+yuTawM=', 'C60zDsvzJvs+AMmsewcaUw=='),
+(236, '00XbNGJhhHYUhROwOj6tOKBlja4eqL8A5nIo3AJSgv462Qp+ZBmF+ZM3MsQy/F8c85oeSk2jP9DBjAQf7kIHtYvi2Qo/B4X7Co0SjRqRJTc=', 19, 11, 'LbBgqJkh+EblHEWs95a5Xg==', '2024-11-15 17:27:15', '', '', '', '', ''),
+(237, 'RvDio9pGQmBuAHyX4QHV44IUSptI8zfETsded20uUBRCSVEZrnvd/uZVCHRTtC+2tFN4z2iN89NzCb/Xg5qy/6IvtoUriMr5I2jAulSrmHY=', 19, 11, 'meIXBw6o7wjiIeqcEmDzdw==', '2024-11-15 17:30:08', '', '', '', '', ''),
+(238, 'Rl1ozZQPex9td39Q/mIxMw==', 0, 0, 'rgbmjILcxZ0B5sT7/JQ0rA==', '2024-11-15 17:31:00', 'admin', '4OQAU+SkOI2GTVjgPIqUeQSREsQ+bWUaZj0SsXJ7qLk=', '9CKl5E4mlNZu6ZFkH9KatA==', 'oivTcNwEQERFRQtyNDFdPyAa+TpaGVEkUD0kRaOikEQ=', 'Xfr4ea6qSQrgpGzt+BFl7A=='),
+(239, 'zzrety8QmTVGjzjFLl/0FvRdcYnW1p+tPkgsWQ0OyjE=', 19, 0, 'Oss7S+PqXxPKuPYKZB8Pxw==', '2024-11-15 17:40:57', '', 'u8pSG2aDRRTYHQRPObz2jMzDfBwzsKb/I2EJJqo28MQ=', 'MPSaYavq9DQkQIVclnsliw==', '', '');
 
 -- --------------------------------------------------------
 
@@ -264,7 +276,7 @@ CREATE TABLE `admintb` (
 --
 
 INSERT INTO `admintb` (`username`, `password`, `csrf_token`, `password_iv`) VALUES
-('admin', 'DOAQTZCJOtlQf5PWa5O97Q==', '59d8c415ab192c6dc47909d3f92de5c83c20e94bd5ec7954c02b5c94040938a4', '3s4VOxbId2WbSmDusoKFQw==');
+('admin', 'DOAQTZCJOtlQf5PWa5O97Q==', 'c3d36dae5be509971101770df30d13ba607a58ebbef56f38fabac0fb78f25b2f', '3s4VOxbId2WbSmDusoKFQw==');
 
 -- --------------------------------------------------------
 
@@ -326,7 +338,8 @@ INSERT INTO `appointmenttb` (`pid`, `ID`, `fname`, `lname`, `gender`, `email`, `
 (19, 48, 'Huizhen', 'Chin', 'DJrUD6FmzlyivnGbrJRUIw==', 'ttKhwwcXabaO6fTgGUFCsW4BBzYJd/BwPuigJ33Z2fI=', 'KJrZoUNdW4hTSDQk6Z4JTA==', '22', 'gFBaY5cE3lVwnDs+y0p7Kg==', '7CcstA7lQ0p7jD/Y6juoOA==', '8e3fqX1Nx2OXMh3cSaWWrg==', 1, 1, NULL, NULL, 'lFAVYoe+xEb1s7y4sGMEqw==', 'luiewAEm0oDlSqdEI4/mjQ==', '/b698PHafHo3uWwwkBzJig==', NULL, 'Xi1a/ELJscgbJhLzODA0AQ==', 'Be8OvuUnoZFle9++bwmkgA==', 'vrQlSrWubIwIh4MUcjppHA=='),
 (19, 49, 'Huizhen', 'Chin', 'aC4bzPJYubzWjQTKDJ94mw==', '4XK2XyndcAS0HQXrBuD/RalL+SaVij1INzaW7THJNVQ=', 'p0U+RtIO6BmwFVyW33mIeQ==', '22', 'rFQ+4cD5qXXeUEAsUzLqJg==', 'GCv5034Hk2pgWlflzlFupw==', 'Usoli8Wx68Y60KhRqXEamg==', 1, 1, NULL, NULL, 'b3l+ouGVrbSdHaPDAwQq+Q==', 'r6E7l1DCw9YZKIy1/aUhCQ==', 'BGts4DOLCeVyjuQKpaWFJg==', NULL, 'KyjcbVfIeGnRXVRIELLBhw==', 'hAMUDBIvkc/UJKh84ziNAw==', 'TEKxpmDHQ8qxPf/v0rzQrA=='),
 (19, 50, 'Huizhen', 'Chin', 'H0TK6O3xHVTMDSE3h8Ws4g==', 'Apm+tjsa9qrYlea2liCFBIisd+vXM/YWmLlvGFMhUuM=', 'afBbjklkj4n/ZPFiaz+8rA==', '10', 'jVJYqraVQYcNQiH5tS3YHA==', 'GP1KmioB1xK41cHTDB2Gew==', 'g2LNK0SnEZayOIQ1FEMQLw==', 1, 1, NULL, NULL, 'C6SVH8g7i8Tmhq4A+dSlVQ==', 'edbbAECKChvw2IrAARRaUw==', '/LHmeUelHFBfBMFBQz76nQ==', NULL, 'HQJiMUuWds6SCZXeMqoqoA==', 'sT2X1GozBLSwMdT1A69/xA==', 'oc6C4L+bvkG4QSA2aLfH8A=='),
-(19, 51, 'Huizhen', 'Chin', 'Z8Gt0QFxTEiwnvAq6ZSKQw==', 'jiAn1BhFcPsq+4WSIzehC8eca1J72Pyt9Wiz+8NilH4=', 'YGNwuDe6UnUZGqqAvMfJZA==', '12', 'IPVsHfdgT9+E2LwTMTldjA==', 'DV/NQtWRw/2KoWqbhffRrw==', 'YqlMn9VFguUP7lbZp9rF7w==', 1, 1, NULL, NULL, 'CtO1fpX8ZwgOMrQ06u5wjw==', 'B/9VkbCW9fGUQZGcr9RIyA==', '50k470T7L52UBe4DovzjJQ==', NULL, 'U6oaUYNDVnKA7sz1WKbAXQ==', '/UBZIhDs7Kq+5uLySy4JLA==', 'aQOANU0/MpJJIOaXz2SUSQ==');
+(19, 51, 'Huizhen', 'Chin', 'Z8Gt0QFxTEiwnvAq6ZSKQw==', 'jiAn1BhFcPsq+4WSIzehC8eca1J72Pyt9Wiz+8NilH4=', 'YGNwuDe6UnUZGqqAvMfJZA==', '12', 'IPVsHfdgT9+E2LwTMTldjA==', 'DV/NQtWRw/2KoWqbhffRrw==', 'YqlMn9VFguUP7lbZp9rF7w==', 1, 1, NULL, NULL, 'CtO1fpX8ZwgOMrQ06u5wjw==', 'B/9VkbCW9fGUQZGcr9RIyA==', '50k470T7L52UBe4DovzjJQ==', NULL, 'U6oaUYNDVnKA7sz1WKbAXQ==', '/UBZIhDs7Kq+5uLySy4JLA==', 'aQOANU0/MpJJIOaXz2SUSQ=='),
+(31, 52, 'furpaws', 'lian', 'y5XIvWnIeTQ8E6rSKRR/4g==', 'VIJzbpmxGGLuUo3SxQ72OCVTxPqi6nGY3o1p9bGVuNSLsftrHEhFFzSeQLaZIiKs', 's2z9ZDsXO/VYQrMZGRm0jg==', '11', 'qSuGg48Sr0TH7fELTg/+sA==', '8L4+y9yl7fYeMg3+b+CtsA==', '3nbuUVElvhIhmBrBVzRpMw==', 1, 1, NULL, NULL, 'NhefNJVnUgenoniIKhM1Fw==', '/Nzu5glEqe9repHl5UF1aQ==', '7yHdMGyxYi+HmHEv0GvJjQ==', NULL, 'bpsnP4VDAwNTRo31gvBPtg==', 'INMWXnY50VjfKOwf6j/nKA==', 'ZeRS6UvhKgYmuGYce62sAw==');
 
 -- --------------------------------------------------------
 
@@ -354,7 +367,8 @@ INSERT INTO `contact` (`name`, `email`, `contact`, `message`, `email_iv`, `conta
 ('HuiZhen Chin', 'v6jKbv02bul1lejSah8/9hhREVA8fe9AyOh5NFENBK4=', 'T+WDVOtHA5CAsKljU9Ey7w==', '7xoy+RPR3ps3HH+ra1P6Qg==', 'p6k9TqOJUvJ5SvjUpXPdpw==', 'nYSAZIO4STGIx89U50lGZg==', '6wmqGwxK4Gjqk9FSzHy7xg=='),
 ('HuiZhen Chin', 'VKKNr4/MEYZTXtQnpOQQLPHZIXOmwJCOMCLRi6vtWi8=', '99C0a2ixHre5MTTC+pJNhA==', 'f1BYVWjRZDuEx4PY3P2BCA==', 'iEU/SETlDrbWsp1lKxZ8sQ==', 'RH3gF60r0pagoLtkxywM8A==', 'mLDK7bMyDh/0Z17GIZis3w=='),
 ('test', '1DydROIefnIKRnm+TMoDqCCjURUdcsz5e7VeSRUZmVQ=', 'RcJL1+huYYoYs+R0Eq1wJQ==', 'JyCsTbQCj46h/YMfXuKNew==', 'nVOP86R2iEF/VU56z5VfnQ==', '7slRPRCAwNMJNEYQUHWmSg==', 'yYW4T7tUruCwyoxrhKjPjg=='),
-('HuiZhen Chin', 'SBrxy4QLMY036QQnj9kgPLSImJojAn/6E1fy6JnAjGg=', 'MFtymZNzQfCx3IyMI5AyAw==', 'tKIvYlJRkN6x9wgjl2iSuA==', 'ouPfJoBPebpekEm4o/aZ8w==', 'BtSHztbdwlTm3kGOamV2EA==', '//wJ24b/LzppRcdQUThoGQ==');
+('HuiZhen Chin', 'SBrxy4QLMY036QQnj9kgPLSImJojAn/6E1fy6JnAjGg=', 'MFtymZNzQfCx3IyMI5AyAw==', 'tKIvYlJRkN6x9wgjl2iSuA==', 'ouPfJoBPebpekEm4o/aZ8w==', 'BtSHztbdwlTm3kGOamV2EA==', '//wJ24b/LzppRcdQUThoGQ=='),
+('HuiZhen Chin', 'BSjj2jTrgkR751bzwzzEDcuflIfztHdVp7UuduICoFk=', 'stv+EOTUgv3yr0V0Gx3FHw==', 'tC2JNzn1khdslBcj9lkU9Q==', 'nGxFluc13NuewLzLIkvnSA==', 'Lz+QDQv1nbJ9KXNR5EPIlw==', 'QFCR7ulQZco4lK+rKuRcwA==');
 
 -- --------------------------------------------------------
 
@@ -381,7 +395,7 @@ CREATE TABLE `doctb` (
 
 INSERT INTO `doctb` (`doc_id`, `username`, `password`, `email`, `spec`, `docFees`, `email_iv`, `spec_iv`, `doc_Fees_iv`, `csrf_token`) VALUES
 (10, 'john', '$2y$10$8dEdjMB4IWSOxwJ.jUmWWObMyhKnXtByJc6EUVHiw3EUXAF9eiZ16', '/5t3Gvo5Q5VxsS51n4hF/pi1hKo9uHAPdIUierCJmKk=', 'H6XMpc0M0xGI7waXW/SBIw==', 'cVsixmc7CdvUJoZwFbLVsA==', 'RGj0iCwwFyTRXlx/xhBLhw==', 'Mds6gbt/T8pQRUfyNRkHoA==', 'jPKFEC572y3B010rrmOqDg==', '2e0c41c0307471cd78be0ce9140884e5b007788b28f1fee5bb5aa0254e598b2d'),
-(11, 'johnlim', '$2y$10$tlSuOTouqaOvCKWkyhoASOJBwSmbi7l1kKftOUHUusAUZ5Vyy/ANi', 'QbBU1668s1d1wiw2jWmbFFACkNhu/qJXFM3SzZnrxxHLMD342VlK+/nGXJq6bY9y', 'dSSd2FQzz9RZNCGTi5CnOA==', 'on7gHuBoNhnZzEbSdW109A==', 'aE/E8aPOEhC+pGwEAVq5VA==', 'RzHnww+tnNhaDBPnp/ASLA==', 'Pm6hYUUtI3lQEt03/X4FTg==', 'bc0e195a9612cc3cd98110cc2e094adfaf6a0b59c2d5058433de59ff6f58c109'),
+(11, 'johnlim', '$2y$10$tlSuOTouqaOvCKWkyhoASOJBwSmbi7l1kKftOUHUusAUZ5Vyy/ANi', 'QbBU1668s1d1wiw2jWmbFFACkNhu/qJXFM3SzZnrxxHLMD342VlK+/nGXJq6bY9y', 'dSSd2FQzz9RZNCGTi5CnOA==', 'on7gHuBoNhnZzEbSdW109A==', 'aE/E8aPOEhC+pGwEAVq5VA==', 'RzHnww+tnNhaDBPnp/ASLA==', 'Pm6hYUUtI3lQEt03/X4FTg==', '0b2279b542626265d2023eb608913b6b6ea92c945cf3d204457701aa74194b05'),
 (12, 'emily', '$2y$10$qMZCrKAAzGVO7P/tpVbxyOZb7Fm2wWYXnLSqosIjC78KBfcKtNg/O', '0JUeJSjJdpxyfwk61+97Oieo0+BwKYEbgs7ZSr9UC94=', 'DVd4++O0aVek1omg8/J3HA==', 'AVsh3LDbPydepLWZAk0q/g==', 'EMIXP9URoBDd++gouL/SaA==', 'AM7Sebt20N8C2zhRJ+0Rsw==', 'B6IuT9TzdsAX3HJXbps8QQ==', NULL),
 (22, 'TAN YI XING', '$2y$10$20ZcjVzWl5qoUosAEwgMteNXkaYyQ7t5qQXWJwjJbEKvupTsDdY8G', 'aRsk/T0wOeqGpKSHdX+6ADhXKFeIrZNabGXSXHV0kmc=', 'FeYVY1DJC/Kerm4EEzYhbQ==', '/DY3br76MXYkprd69f/Glg==', 'qA7bZjJPdRCZZ5OSoKVFsQ==', 'qN7ms+9TvKvVKCKp/F2lmA==', 'AATVGaCPPs2VhkqRwkrseA==', NULL),
 (23, 'LIM CHEE HING', '$2y$10$736eiBPVWtr5PF69YqUKdebUV1A2haJ6ATWBpWCPkqFBAWcA2INN6', 'qwvWa1XQBz5MMV3x9lQSDiVR3BSJ1N8AIiteD02LfaQ8HqqbbGhqSnxBEdIPFR7k', 'RXaKbolWRL/qSNuQ8c3K7A==', 'B9amViaQHbS2lWRH7SMI7w==', 'fTvI7jJ0I3+47DysY3qEqA==', 'MAwGt+lgTB2gZwbbpfCo2g==', 'UHsrXHthhSNy8Cy95lSKHw==', '988fb2d45ac782f285a57cb7163da04747b10a13992f0cef18b3e6830a105f0b');
@@ -411,9 +425,10 @@ CREATE TABLE `patreg` (
 --
 
 INSERT INTO `patreg` (`pid`, `fname`, `lname`, `gender`, `email`, `contact`, `password`, `gender_iv`, `email_iv`, `contact_iv`, `csrf_token`) VALUES
-(19, 'Huizhen', 'Chin', 'reuBuFIRrWTD/YbXvmkRzg==', '1LrQJEgtU8dpAI+mAZjTSC3/YHTH9n6GeJM/JC6uNBY=', 'KN8QEBvaPRpIPNC8Wzi0kg==', '$2y$10$xlEA0phy61M8SkbCzURhYuLpiuo6j3qp9Id7fCCgIgoAs.CwF88uK', 'EnWjfenGpt7HYGckhktt8g==', 'cI8no5pid3YZH4iaPTufMg==', 'VcO87A7cLlnp4Hk/ckQ9wA==', '7aad8fc1ec281d7da6d2a5e194e969ba8e8f54e40826f2cde30c934814b7b1ae'),
+(19, 'Huizhen', 'Chin', 'reuBuFIRrWTD/YbXvmkRzg==', '1LrQJEgtU8dpAI+mAZjTSC3/YHTH9n6GeJM/JC6uNBY=', 'KN8QEBvaPRpIPNC8Wzi0kg==', '$2y$10$xlEA0phy61M8SkbCzURhYuLpiuo6j3qp9Id7fCCgIgoAs.CwF88uK', 'EnWjfenGpt7HYGckhktt8g==', 'cI8no5pid3YZH4iaPTufMg==', 'VcO87A7cLlnp4Hk/ckQ9wA==', '72cfffe1ed4eaca1310a002bca490b90add6d0c7e4012d4c1a3220457313fb6d'),
 (22, 'timmy', 'Chin', '+PoZB8FinA+lX5Nrf8YDPw==', '7ozk8oPswuofW48CCdGiKwoCeGck3z+DR6rSNf92aHpvDEZvwK/8OZ3zwjXZL3Cg', 'jbxgQTYvcRN7S+h9IERnOQ==', '$2y$10$j59FRAAv1wFVN7TdBQb21OsCJR8FEQT2c3bqeHHX6Kqv22BERIHvG', 'BTnVU3CvpKPtwu54HLvjNg==', '9KTtn+CGqa3rMiH39PPrtg==', '+yo4yrdTaudH6zkW69bWVQ==', NULL),
-(30, 'Jolyn', 'PehJX', 'ynY2hDvDqJeDfwMfT8MfZA==', 'T3TjpLUsD/0F5VuYG3Q5k3FZ0aYlfdz9BUeaRCz2rp4=', 'JI7vVcq+P6kQrEqekgRIMQ==', '$2y$10$9RqxWSBYKqGMsosKV8G8heZTAklBfDIsBHKc.hQeN7q3Rc1DAE2me', 'BfxCb7Us4sEB1gwdNBuHgw==', 'sCRLLb4QvZ/qu+UFNYYGDQ==', '+1wvCckMGvjAC6rNYQL6gw==', '8bb06b1a4f59ad4bf0f01033f23ffef4bb11f521615916d4516b304debaffaf6');
+(30, 'Jolyn', 'PehJX', 'ynY2hDvDqJeDfwMfT8MfZA==', 'T3TjpLUsD/0F5VuYG3Q5k3FZ0aYlfdz9BUeaRCz2rp4=', 'JI7vVcq+P6kQrEqekgRIMQ==', '$2y$10$9RqxWSBYKqGMsosKV8G8heZTAklBfDIsBHKc.hQeN7q3Rc1DAE2me', 'BfxCb7Us4sEB1gwdNBuHgw==', 'sCRLLb4QvZ/qu+UFNYYGDQ==', '+1wvCckMGvjAC6rNYQL6gw==', '8bb06b1a4f59ad4bf0f01033f23ffef4bb11f521615916d4516b304debaffaf6'),
+(31, 'furpaws', 'lian', '9V8LZ4cCaHyUScQ4lk2znA==', 'bMw45Zax5i+ELzmJAHKjnFMqg0v6JJFWKCrC/TT2URu+cPAbnDfPx3cOtYMqDvhz', '3Gy8y3u5ABVBxRraLNJMxA==', '$2y$10$kT9DTG15AQudPmuZUrZDW.c3.WQZkJDw8snhNEXfpIVcN4Cb5SWr.', 'ytQ1RhpN/rKxkXBgRf25UQ==', 'ic3g+GBUxpg9vc2/44kdYA==', 'Dt87B+vDESLuQjtDb+Cn8g==', '633898c0451c62d9dda32b539d3b8a2c9e0e5a28bf3fa24a002521a8e7b779d4');
 
 -- --------------------------------------------------------
 
@@ -450,10 +465,12 @@ CREATE TABLE `prestb` (
 INSERT INTO `prestb` (`pres_id`, `doctor`, `pid`, `ID`, `fname`, `lname`, `appdate`, `apptime`, `disease`, `allergy`, `prescription`, `disease_iv`, `allergy_iv`, `prescription_iv`, `fname_iv`, `lname_iv`, `appdate_iv`, `apptime_iv`, `status`) VALUES
 (5, 'john', 19, 25, 'Nv17HRPj283sMNXhREiagw==', 'r+d6Aj6EG7G7CKa2YpOy2A==', 'ozPLbDkTTTXS5t6UY4NeTW9Ch9LPNkB1uVnSJ7b8d44=', '+b2k4cMx71ocoXEKX+E12dtrWxmEep5KBCBk4X9574g=', 'VkiL+UBTH6yOnLbDWJBpgA==', 'JaZ6wbcRYivy0DHceeNLww==', 'UGcUauzRBjlD28URntxzAGZ3/CIVrqZCh5R2nTyvYo4=', 'ECX8dm/k5jMdAaJDjmPT4Q==', '3EIFMksZNA6/Ypu3mjtAQg==', '4GIyBaYGwp6x6q1RUyMsuQ==', 'b2a1L+WIt7vTUdks9YPGQw==', 'oQ+wyRA4rNiJYqnaFcCTSw==', '0xCzWLfV0m4vEM0/BEOFIA==', '1vByqPv1Fw8YDrhTHHJOwg==', 'Paid'),
 (6, 'john', 19, 27, 'SmUwnGyol+su6jpXgPntpA==', 'TTHrU9E7LM0HssGpJ4oF4Q==', '00DDOrW10MXTXoyPpV5AQw==', 'S69qGwjyyW8gjN5 xRoO/g==', 'aCRLuwv++7n+VWljCcmHWg==', 'rFAu2Dm52M0faWfoTsJxEw==', 'TPAFoKuokgSxu3pG4iwjTw==', 'bCj0hbiZBjFoXpKxgBdCTw==', '2CIob179zEFBEokzPS3WAw==', 'B34mq31otgatA0ROSxvAZQ==', 'Y/EcjsDggEnx1JnY/ZuQpg==', 'TpcYE08MsiwUdYiWl55E3w==', '', '', 'Not Paid'),
-(7, 'john', 19, 30, 'oNhfmS+Ebz7/5mM97cD7+w==', 'hS15/5h61DYpdKABUT21mQ==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'jPmsBrFyEGRNTL872AkFiQ==', 'UzsXQr1zBu4INZ6qwo/Mmw==', 'vZ1kwwlb86cSlBKUDSWl/g==', 'RUzPxvQAkc9syuBZa2QO7g==', 'VcW1srNXSe8P88zUNNa1pw==', 'RJhU3g+rbs+69ZwjWOtLHQ==', 'fkhy3JutfgCX0CVqs5IGnA==', '0HlNeHHnVKRSmvb7TLiAUQ==', '', '', 'Not Paid'),
+(7, 'john', 19, 30, 'oNhfmS+Ebz7/5mM97cD7+w==', 'hS15/5h61DYpdKABUT21mQ==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'jPmsBrFyEGRNTL872AkFiQ==', 'UzsXQr1zBu4INZ6qwo/Mmw==', 'vZ1kwwlb86cSlBKUDSWl/g==', 'RUzPxvQAkc9syuBZa2QO7g==', 'VcW1srNXSe8P88zUNNa1pw==', 'RJhU3g+rbs+69ZwjWOtLHQ==', 'fkhy3JutfgCX0CVqs5IGnA==', '0HlNeHHnVKRSmvb7TLiAUQ==', '', '', 'Paid'),
 (8, 'john', 23, 42, 'ECLghToaLLTzdMaXhyrjAw==', '/j19rwlyYFki32PTEKMmHw==', 'cyrWY2 nDehSBbnVcEgLlw==', 'J7Yer8nMNWT5K6afgPn Tg==', 'EOFq9l0qBrOHIEtv/GBcHA==', 'NPUmTGxvsNBsk8hhK4HOlw==', 'iQpga4jFTxSQvt1TZooALg==', 'RXWQj7YUbI5zqWpDTJKLVw==', 'J1PEbA5c+vHluFGBFgNykw==', '5qk/1kZkyCMKMaKqXSNp0A==', 'jnTsQOXrguqNEL4BKdydNg==', 'r+0XjuTvMTqu7GhYDcTwQg==', '', '', 'Not Paid'),
 (9, 'john', 29, 43, 'iCzDSF9R9jFQGv2a5BOd1g==', 'kWWKrMLEP/axS6SX/Wu5XQ==', 'UNMIELuhHYAOccT2ss5wLw==', 'VwrT5Ft21nMnyFM0KDxwGg==', 'dkIAH+9UsvZcFDP1aX1lDg==', 'G+7MqHQn2qlXD1vdEUYTgQ==', '/Bf1I6Pe0eRcCcYioVk+NA==', '8uGahpv/87idw91+TOC1jg==', 'iHHEK2cjGBxJoJj2GaZluw==', 'Fjx2L6pUbUUYDnbO+iunPw==', '9VTqu+jgKoabz9WaIEhGkw==', 'vzCL2HZ6pOL6cYMhjjj6JA==', '', '', 'Not Paid'),
-(10, 'Jaclyn', 30, 45, 'oX5meZn70Lx50cdlA3vrng==', 'i1Pnpl8zZOgtoClE71sAnw==', 'IrD1KLo96AvjeZHsi7TSWQ==', 'JQFmKvRP0b2M1K6DgEoa Q==', 'Qw11hn0/Ff2qsVya3aX6WA==', 'R5a9z1anpa9ojGBXXmSfFg==', 'wk8ZTt4fE3zQBRNP+tH3mg==', 'ENNQy0lg+NUm3MEYTwUmlg==', '0rR0qxCnGdECM0nr8htBKw==', 'UwoGvOr+PTCzBOuLC94e0g==', '65MOExyOZb6gDv8ntFQHUA==', 'ftMKf1zCnt0IpzU3AueoOg==', '', '', 'Not Paid');
+(10, 'Jaclyn', 30, 45, 'oX5meZn70Lx50cdlA3vrng==', 'i1Pnpl8zZOgtoClE71sAnw==', 'IrD1KLo96AvjeZHsi7TSWQ==', 'JQFmKvRP0b2M1K6DgEoa Q==', 'Qw11hn0/Ff2qsVya3aX6WA==', 'R5a9z1anpa9ojGBXXmSfFg==', 'wk8ZTt4fE3zQBRNP+tH3mg==', 'ENNQy0lg+NUm3MEYTwUmlg==', '0rR0qxCnGdECM0nr8htBKw==', 'UwoGvOr+PTCzBOuLC94e0g==', '65MOExyOZb6gDv8ntFQHUA==', 'ftMKf1zCnt0IpzU3AueoOg==', '', '', 'Not Paid'),
+(11, 'johnlim', 19, 30, '2bvAyoOmOEmtsOOuwbaMgg==', 'U9O3+DG0joJUgOZTpa3PUA==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'fp1DTzB3lYBhQMxZfUTcvw==', 'ukmoj3UkfFTA0xRQW83EwQ==', '97eUR5KDVBanFk7wme7TfQ==', 'XTt9vtjUJP70hPqoUuIqOA==', 'q8XP5gJM4Ine6ukFLesGnQ==', '6FjogqgR+0FqzewfygPSMQ==', 'WCqQOSFkMHguBFyw9IFE6g==', 'GYCDHZ4Ajz6OU/Zi5QVT0Q==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'Paid'),
+(12, 'johnlim', 19, 30, 'xeASNExKKoOysEaNIV2c8Q==', 'NnQt+Um5Q8MWRAexlBNo7A==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'SHgD7rZ4cu+lclTyTtJCEg==', '0nCmIMGVf1r33BEGb61E9Q==', 'AlMtfZQoTd4hZfOtI8RXBA==', 'MyxrjXykQTs3l8BKUu+FOw==', 'GZ0SCJTyGGUGmIYnK8CeCg==', '1WkKCD63jtgGDCyvTVIZWg==', 'QuApeMJQ41ZSJtOjjNnxKw==', 'ubnPDuIa3S9NFHUsN0ZBaA==', 'CP 5LJD304NM4Idqfiv WQ==', 'RQqJUAITas4TlbBA2rdT8A==', 'Paid');
 
 --
 -- Indexes for dumped tables
@@ -497,13 +514,13 @@ ALTER TABLE `prestb`
 -- AUTO_INCREMENT for table `activity_log`
 --
 ALTER TABLE `activity_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=225;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=240;
 
 --
 -- AUTO_INCREMENT for table `appointmenttb`
 --
 ALTER TABLE `appointmenttb`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `doctb`
@@ -515,13 +532,13 @@ ALTER TABLE `doctb`
 -- AUTO_INCREMENT for table `patreg`
 --
 ALTER TABLE `patreg`
-  MODIFY `pid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `pid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `prestb`
 --
 ALTER TABLE `prestb`
-  MODIFY `pres_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `pres_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
