@@ -3,19 +3,22 @@ use Dotenv\Dotenv;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-session_start(); // Start the session
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-// Database connection
+$mail = new PHPMailer(true);
+
+session_start(); 
+
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Read JSON data from the request
+// read JSON data from the request
 $data = json_decode(file_get_contents('php://input'), true);
 
 function encryptData($data) {
@@ -36,12 +39,11 @@ if (isset($data['docId'])) {
     $email = $data['email'];
     $fees = $data['fees'];
 
-    // Encrypt updated values
     $encryptedSpec = encryptData($spec);
     $encryptedEmail = encryptData($email);
     $encryptedFees = encryptData($fees);
 
-    // Update doctor data
+    // update doctor data
     $query = "
         UPDATE doctb 
         SET username = ?, spec = ?, spec_iv = ?, email = ?, email_iv = ?, docFees = ?, doc_Fees_iv = ? 
@@ -64,7 +66,7 @@ if (isset($data['docId'])) {
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
 
-        // Log the update activity
+        // log the update activity
         if (!empty($_SESSION['username'])) {
             $activity = "Updated doctor: $username";
             $encryptedActivity = encryptData($activity);
@@ -92,6 +94,34 @@ if (isset($data['docId'])) {
             }
         } else {
             error_log("Activity log skipped: Admin username not found in session.");
+        }
+
+        $mail = new PHPMailer(true);
+        try {
+          
+          $mail->isSMTP();
+          $mail->Host = 'smtp.gmail.com'; 
+          $mail->SMTPAuth = true;
+          $mail->Username = $_ENV['EMAIL_USERNAME']; 
+          $mail->Password = $_ENV['EMAIL_PASSWORD']; 
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+          $mail->Port = 587;
+      
+          // email settings
+          $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Admin'); 
+            $mail->addAddress($email, $username);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Security Alert: Global Hospital Profile Updated';
+            $mail->Body = "
+                <p>Dear $username,</p>
+                <p>Your profile was recently updated. If this was not you, please contact our support team immediately.</p>
+                <p>Thank you,<br>Support Team</p>
+            ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email could not be sent. Error: {$mail->ErrorInfo}");
         }
     } else {
         echo json_encode(['success' => false, 'error' => $stmt->error]);

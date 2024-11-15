@@ -85,7 +85,7 @@ if (isset($_POST['patsub'])) {
           $_SESSION['email'] = $email;
 
           $_SESSION['start_time'] = time(); // current time
-          $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
+          $_SESSION['expiration_time'] = 10800; // expiration time in 3 hours
           $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
           $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

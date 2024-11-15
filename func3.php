@@ -4,7 +4,6 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
-// Load .env file
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -15,22 +14,22 @@ if (!$con) {
 
 if (!function_exists('encryptData')) {
     function encryptData($data) {
-        $encryptionKey = $_ENV['ENCRYPTION_KEY']; // Get the encryption key from .env
-        $cipherMethod = $_ENV['CIPHER_METHOD'];   // Get the cipher method from .env
+        $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+        $cipherMethod = $_ENV['CIPHER_METHOD'];   
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipherMethod));
         $encrypted = openssl_encrypt($data, $cipherMethod, $encryptionKey, 0, $iv);
         return [
             'data' => $encrypted,
-            'iv' => base64_encode($iv) // Store IV in base64
+            'iv' => base64_encode($iv) 
         ];
     }
 }
 
 if (!function_exists('decryptData')) {
     function decryptData($encryptedData, $iv) {
-        $encryptionKey = $_ENV['ENCRYPTION_KEY']; // Get the encryption key from .env
-        $cipherMethod = $_ENV['CIPHER_METHOD'];   // Get the cipher method from .env
-        $iv = base64_decode($iv);  // Decode the IV from base64
+        $encryptionKey = $_ENV['ENCRYPTION_KEY']; 
+        $cipherMethod = $_ENV['CIPHER_METHOD'];   
+        $iv = base64_decode($iv); 
         $decrypted = openssl_decrypt($encryptedData, $cipherMethod, $encryptionKey, 0, $iv);
         return $decrypted;
     }
@@ -40,7 +39,6 @@ if (isset($_POST['adsub'])) {
     $username = $_POST['username1'];
     $password = $_POST['password2'];
 
-    // Fetch the encrypted password and IV from the database
     $query = "SELECT password, password_iv FROM admintb WHERE username='$username';";
     $result = mysqli_query($con, $query);
 
@@ -49,25 +47,23 @@ if (isset($_POST['adsub'])) {
         $encryptedPassword = $row['password'];
         $passwordIv = $row['password_iv'];
 
-        // Decrypt the password from the database
         $decryptedPassword = decryptData($encryptedPassword, $passwordIv);
 
-        // Check if the decrypted password matches the input password
         if ($decryptedPassword == $password) {
             $_SESSION['username'] = $username;
             $_SESSION['start_time'] = time(); // current time
-            $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
+            $_SESSION['expiration_time'] = 10800; // expiration time in 3 hours
             $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
-            // Generate and set new CSRF token
+            // generate and set new CSRF token
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             $csrf_token = $_SESSION['csrf_token'];
 
-            // Update CSRF token in the database
+            // update CSRF token in the database
             $update_query = "UPDATE admintb SET csrf_token='$csrf_token' WHERE username='$username';";
             mysqli_query($con, $update_query);
 
-            // Insert into activity log
+            // insert into activity log
             date_default_timezone_set('Asia/Kuala_Lumpur');
             $loginTime = date('Y-m-d H:i:s');
             $activity = "Admin logged in";
@@ -96,7 +92,7 @@ if (isset($_POST['adsub'])) {
 
 
             if (mysqli_query($con, $logQuery)) {
-                // Logged successfully
+                // logged successfully
                 header("Location: admin-panel1.php");
                 exit();
             } else {

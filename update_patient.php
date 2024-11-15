@@ -8,6 +8,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+$mail = new PHPMailer(true);
+
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 if (!$con) {
     die(json_encode(['success' => false, 'error' => 'Database connection failed']));
@@ -84,6 +89,31 @@ if (isset($data['pid'], $data['fname'], $data['lname'], $data['email'], $data['c
             }
         } else {
             error_log("Activity log skipped: Admin username not found in session.");
+        }
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = $_ENV['EMAIL_USERNAME'];
+            $mail->Password = $_ENV['EMAIL_PASSWORD'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Admin');
+            $mail->addAddress($email, $fname . ' ' . $lname);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Security Alert: Global Hospital Profile Updated';
+            $mail->Body = "
+                <p>Dear $fname $lname,</p>
+                <p>Your profile was recently updated. If this was not you, please contact our support team immediately.</p>
+                <p>Thank you,<br>Support Team</p>
+            ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email could not be sent. Error: {$mail->ErrorInfo}");
         }
     } else {
         echo json_encode(['success' => false, 'error' => $stmt->error]);

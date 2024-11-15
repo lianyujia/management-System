@@ -40,21 +40,23 @@ if (isset($_SESSION['pid']) || isset($_SESSION['doc_id']) || isset($_SESSION['us
   if ($pid) {
       // Patient logout
       $updateQuery = "
-          UPDATE activity_log 
-          SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
-          WHERE pid = '$pid' 
-          AND logout = '' 
-          ORDER BY created_on DESC 
-          LIMIT 1
-      ";
+        UPDATE activity_log 
+        SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
+        WHERE pid = '$pid' 
+        AND login IS NOT NULL 
+        AND logout IS NULL 
+        ORDER BY created_on ASC 
+        LIMIT 1;
+    ";
   } elseif ($doc_id) {
       // Doctor logout
       $updateQuery = "
           UPDATE activity_log 
           SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
           WHERE doc_id = '$doc_id' 
-          AND logout = '' 
-          ORDER BY created_on DESC 
+          AND login IS NOT NULL 
+          AND logout IS NULL 
+          ORDER BY created_on ASC 
           LIMIT 1
       ";
   } elseif ($admin) {
@@ -63,8 +65,9 @@ if (isset($_SESSION['pid']) || isset($_SESSION['doc_id']) || isset($_SESSION['us
           UPDATE activity_log 
           SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
           WHERE admin = '$admin' 
-          AND logout = '' 
-          ORDER BY created_on DESC 
+          AND login IS NOT NULL 
+          AND logout IS NULL 
+          ORDER BY created_on ASC 
           LIMIT 1
       ";
   }

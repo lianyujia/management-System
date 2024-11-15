@@ -221,15 +221,52 @@ if (isset($_POST['app-submit'])) {
   }
 }
 
+if (isset($_GET['cancel'])) {
+  $appointmentID = $_GET['ID'];
 
+  $fname = $_SESSION['fname']; 
+  $lname = $_SESSION['lname'];
 
+  $appointmentQuery = mysqli_query($con, "SELECT doctor, pid FROM appointmenttb WHERE ID = '$appointmentID'");
+  $appointmentData = mysqli_fetch_assoc($appointmentQuery);
 
-if(isset($_GET['cancel']))
-{
-  $query=mysqli_query($con,"update appointmenttb set userStatus='0' where ID = '".$_GET['ID']."'");
-  if($query)
-  {
-    echo "<script>alert('Your appointment successfully cancelled');</script>";
+  if ($appointmentData) {
+      $doc_id = $appointmentData['doctor'];
+      $pid = $appointmentData['pid'];
+
+      // retrieve doctor details
+      $doctorQuery = mysqli_query($con, "SELECT username FROM doctb WHERE doc_id = '$doc_id'");
+      $doctorData = mysqli_fetch_assoc($doctorQuery);
+
+      if ($doctorData) {
+          $doctorUsername = $doctorData['username'];
+
+          // cancel the appointment
+          $updateQuery = mysqli_query($con, "UPDATE appointmenttb SET userStatus = '0' WHERE ID = '$appointmentID'");
+          if ($updateQuery) {
+              echo "<script>alert('Your appointment successfully cancelled');</script>";
+
+              // activity log
+              $activity = "Appointment Cancelled by: $fname $lname for Dr. $doctorUsername.";
+              $encryptedActivity = encryptData($activity); // Assuming encryptData is a valid function
+
+              $logQuery = "
+                  INSERT INTO activity_log (activity, activity_iv, pid, doc_id, created_on) 
+                  VALUES ('" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "', '$pid', '$doc_id', NOW())
+              ";
+              $logResult = mysqli_query($con, $logQuery);
+
+              if (!$logResult) {
+                  echo "<script>alert('Error logging activity');</script>";
+              }
+          } else {
+              echo "<script>alert('Error cancelling appointment');</script>";
+          }
+      } else {
+          echo "<script>alert('Doctor details not found');</script>";
+      }
+  } else {
+      echo "<script>alert('Appointment not found');</script>";
   }
 }
 

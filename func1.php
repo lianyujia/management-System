@@ -53,7 +53,7 @@ if (isset($_POST['docsub1'])) {
         $_SESSION['dname'] = $dname;
         $_SESSION['doc_id'] = $doc_id; 
         $_SESSION['start_time'] = time(); // current time
-        $_SESSION['expiration_time'] = 1800; // expiration time in 30 minutes
+        $_SESSION['expiration_time'] = 10800; // expiration time in 3 hours
         $_SESSION['end_time'] = $_SESSION['start_time'] + $_SESSION['expiration_time'];
 
         // generate a new CSRF token and store it in the session

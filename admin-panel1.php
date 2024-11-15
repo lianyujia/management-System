@@ -1243,7 +1243,6 @@ function updateDoctorDropdown(doctors) {
 		}
 
     document.addEventListener('DOMContentLoaded', () => {
-    // Handle Edit button
     document.querySelectorAll('.edit-button').forEach(button => {
         button.addEventListener('click', function () {
             const row = this.closest('tr');
@@ -1251,24 +1250,30 @@ function updateDoctorDropdown(doctors) {
                 cell.setAttribute('contenteditable', 'true');
             });
 
-            this.style.display = 'none'; // Hide Edit button
-            row.querySelector('.save-button').style.display = 'inline-block'; // Show Save button
+            this.style.display = 'none'; 
+            row.querySelector('.save-button').style.display = 'inline-block'; 
         });
     });
 
-    // Handle Save button
     document.querySelectorAll('.save-button').forEach(button => {
         button.addEventListener('click', function () {
             const row = this.closest('tr');
-            const docId = row.querySelector('.doc-id').value; // Get doc_id from the hidden field
+            const docId = row.querySelector('.doc-id').value; 
             const updatedData = {
-                username: row.children[0].innerText,
-                spec: row.children[1].innerText,
-                email: row.children[2].innerText,
-                fees: row.children[3].innerText
+                username: row.children[0].innerText.trim(),
+                spec: row.children[1].innerText.trim(),
+                email: row.children[2].innerText.trim(),
+                fees: row.children[3].innerText.trim()
             };
 
-            // Send AJAX request to update the database
+            // validate that all fields
+            for (const [key, value] of Object.entries(updatedData)) {
+                if (!value) {
+                    alert(`The field cannot be empty. Please fill out all fields before saving.`);
+                    return; 
+                }
+            }
+
             fetch('update_doctor.php', {
                 method: 'POST',
                 headers: {
@@ -1283,57 +1288,68 @@ function updateDoctorDropdown(doctors) {
                     } else {
                         alert('Failed to update doctor information.');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating doctor information.');
                 });
 
+            // disable editing after saving
             row.querySelectorAll('td[contenteditable]').forEach(cell => {
                 cell.setAttribute('contenteditable', 'false');
             });
 
-            this.style.display = 'none'; // Hide Save button
-            row.querySelector('.edit-button').style.display = 'inline-block'; // Show Edit button
+            this.style.display = 'none'; 
+            row.querySelector('.edit-button').style.display = 'inline-block'; 
         });
     });
 });
 
-function enableEdit(pid) {
-        // Enable editing for fields
-        document.getElementById(`fname-${pid}`).contentEditable = true;
-        document.getElementById(`lname-${pid}`).contentEditable = true;
-        document.getElementById(`email-${pid}`).contentEditable = true;
-        document.getElementById(`contact-${pid}`).contentEditable = true;
+    function enableEdit(pid) {
+            // enable editing for fields
+            document.getElementById(`fname-${pid}`).contentEditable = true;
+            document.getElementById(`lname-${pid}`).contentEditable = true;
+            document.getElementById(`email-${pid}`).contentEditable = true;
+            document.getElementById(`contact-${pid}`).contentEditable = true;
 
-        // Show save button
-        document.getElementById(`save-btn-${pid}`).style.display = 'inline-block';
-    }
+            document.getElementById(`save-btn-${pid}`).style.display = 'inline-block';
+        }
 
     function savePatient(pid) {
-        const fname = document.getElementById(`fname-${pid}`).innerText;
-        const lname = document.getElementById(`lname-${pid}`).innerText;
-        const email = document.getElementById(`email-${pid}`).innerText;
-        const contact = document.getElementById(`contact-${pid}`).innerText;
+        const fname = document.getElementById(`fname-${pid}`).innerText.trim();
+        const lname = document.getElementById(`lname-${pid}`).innerText.trim();
+        const email = document.getElementById(`email-${pid}`).innerText.trim();
+        const contact = document.getElementById(`contact-${pid}`).innerText.trim();
+
+        // validate that no field is empty after trimming
+        if (!fname || !lname || !email || !contact) {
+            alert('All fields must be filled out before saving!');
+            return;
+        }
 
         fetch('update_patient.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pid, fname, lname, email, contact })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Patient details updated successfully!');
-                // Disable editing after saving
-                document.getElementById(`fname-${pid}`).contentEditable = false;
-                document.getElementById(`lname-${pid}`).contentEditable = false;
-                document.getElementById(`email-${pid}`).contentEditable = false;
-                document.getElementById(`contact-${pid}`).contentEditable = false;
-                document.getElementById(`save-btn-${pid}`).style.display = 'none';
-            } else {
-                alert('Failed to update patient details: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Patient details updated successfully!');
+                    // disable editing after saving
+                    document.getElementById(`fname-${pid}`).contentEditable = false;
+                    document.getElementById(`lname-${pid}`).contentEditable = false;
+                    document.getElementById(`email-${pid}`).contentEditable = false;
+                    document.getElementById(`contact-${pid}`).contentEditable = false;
+                    document.getElementById(`save-btn-${pid}`).style.display = 'none';
+                
+                } else {
+                    alert('Failed to update patient details: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 
 </script>
