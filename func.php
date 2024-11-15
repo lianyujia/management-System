@@ -71,8 +71,8 @@ if (isset($_POST['patsub'])) {
   if ($isEmailValid) {
       $stored_hashed_password = $row['password'];
 
-      echo "Entered Password: $password<br>";
-      echo "Stored Hashed Password: $stored_hashed_password<br>";
+      // echo "Entered Password: $password<br>";
+      // echo "Stored Hashed Password: $stored_hashed_password<br>";
 
       if (password_verify($password, $stored_hashed_password)) {
           // password matches, set session variables
