@@ -337,7 +337,7 @@ if (isset($_GET['generate_bill']) && $_GET['generate_bill'] === 'true') {
   $obj_pdf->writeHTML($content);
 
   // Set a password for the PDF
-  $userPassword = "123"; // replace with desired password
+  $userPassword = $email . $contact;
   $obj_pdf->SetProtection(array('print', 'copy'), $userPassword);
 
   ob_end_clean();

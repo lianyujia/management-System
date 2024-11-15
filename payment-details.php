@@ -33,7 +33,6 @@ if (!$con) {
 // Check if bill ID is passed
 if (isset($_GET['ID'])) {
     $billID = $_GET['ID'];
-    // Optional: Fetch bill details from the database using $billID
 } else {
     echo "No bill selected for payment.";
     exit();
@@ -82,9 +81,9 @@ function generate_bill(){
     $obj_pdf->SetFont('helvetica', '', 12);
     $obj_pdf->AddPage();
   
-    // Password for the PDF (you can make this dynamic as needed)
-    $user_password = "user123"; // Password to open the PDF
-    $owner_password = 123; // Optional: Owner's password (set if you want different permissions for owner)
+    // Password for the PDF
+    $user_password = "user123";
+    $owner_password = 123;
   
     // Set protection with the password
     $obj_pdf->SetProtection(array('print', 'copy'), $user_password, $owner_password);
@@ -102,9 +101,5 @@ function generate_bill(){
     ob_end_clean();
     $obj_pdf->Output("bill.pdf", 'I');
   }
-  
-
-// (Optional) Fetch bill details or handle further logic here
-
 ?>
 
