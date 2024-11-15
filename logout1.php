@@ -40,40 +40,112 @@ if (isset($_SESSION['pid']) || isset($_SESSION['doc_id']) || isset($_SESSION['us
   $encryptedLogoutTime = encryptData($logoutTime);
 
   if ($pid) {
-      // Patient logout
-      $updateQuery = "
-        UPDATE activity_log 
-        SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
-        WHERE pid = '$pid' 
-        AND login IS NOT NULL 
-        AND logout IS NULL 
-        ORDER BY created_on ASC 
-        LIMIT 1;
-    ";
+    // Patient logout
+    if (isset($_SESSION['activity_log_id'])) {
+        $activityLogId = $_SESSION['activity_log_id'];
+
+        date_default_timezone_set('Asia/Kuala_Lumpur');
+        $logoutTime = date('Y-m-d H:i:s');
+        $encryptedLogoutTime = encryptData($logoutTime);
+
+        // set logout time based on activity_log ID
+        $updateQuery = "
+            UPDATE activity_log 
+            SET logout = '" . $encryptedLogoutTime['data'] . "', 
+                logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
+            WHERE log_id = $activityLogId
+        ";
+
+        if (mysqli_query($con, $updateQuery)) {
+            // successfully updated the logout time
+            session_destroy(); // destroy the session
+            header("Location: index.php"); 
+            exit();
+        } else {
+            echo "<script>
+                alert('Error updating logout time. Please try again.');
+                window.location.href = 'admin-panel.php';
+                </script>";
+        }
+    } else {
+        echo "<script>
+            alert('No active session found. Please log in again.');
+            window.location.href = 'index.php';
+            </script>";
+    }
+
 
   } elseif ($doc_id) {
-      // Doctor logout
-      $updateQuery = "
-          UPDATE activity_log 
-          SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
-          WHERE doc_id = '$doc_id' 
-          AND login IS NOT NULL 
-          AND logout IS NULL 
-          ORDER BY created_on ASC 
-          LIMIT 1
-      ";
+    // Doctor logout
+    if (isset($_SESSION['activity_log_id'])) {
+        $activityLogId = $_SESSION['activity_log_id'];
+
+        date_default_timezone_set('Asia/Kuala_Lumpur');
+        $logoutTime = date('Y-m-d H:i:s');
+        $encryptedLogoutTime = encryptData($logoutTime);
+
+        // set logout time based on activity_log ID
+        $updateQuery = "
+            UPDATE activity_log 
+            SET logout = '" . $encryptedLogoutTime['data'] . "', 
+                logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
+            WHERE log_id = $activityLogId
+        ";
+
+        if (mysqli_query($con, $updateQuery)) {
+            // successfully updated the logout time
+            session_destroy(); // destroy the session
+            header("Location: index.php"); 
+            exit();
+        } else {
+            echo "<script>
+                alert('Error updating logout time. Please try again.');
+                window.location.href = 'doctor-panel.php';
+                </script>";
+        }
+    } else {
+        echo "<script>
+            alert('No active session found. Please log in again.');
+            window.location.href = 'index.php';
+            </script>";
+    }
+
   } elseif ($admin) {
-      // Admin logout
-      $updateQuery = "
-          UPDATE activity_log 
-          SET logout = '" . $encryptedLogoutTime['data'] . "', logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
-          WHERE admin = '$admin' 
-          AND login IS NOT NULL 
-          AND logout IS NULL 
-          ORDER BY created_on ASC 
-          LIMIT 1
-      ";
-  }
+    // Admin logout
+    if (isset($_SESSION['activity_log_id'])) {
+        $activityLogId = $_SESSION['activity_log_id'];
+
+        date_default_timezone_set('Asia/Kuala_Lumpur');
+        $logoutTime = date('Y-m-d H:i:s');
+        $encryptedLogoutTime = encryptData($logoutTime);
+
+        // set logout time based on activity_log ID
+        $updateQuery = "
+            UPDATE activity_log 
+            SET logout = '" . $encryptedLogoutTime['data'] . "', 
+                logout_iv = '" . $encryptedLogoutTime['iv'] . "' 
+            WHERE log_id = $activityLogId
+        ";
+
+        if (mysqli_query($con, $updateQuery)) {
+            // successfully updated the logout time
+            session_destroy(); // destroy the session
+            header("Location: index.php"); 
+            exit();
+        } else {
+            echo "<script>
+                alert('Error updating logout time. Please try again.');
+                window.location.href = 'admin-panel1.php';
+                </script>";
+        }
+    } else {
+        echo "<script>
+            alert('No active session found. Please log in again.');
+            window.location.href = 'index.php';
+            </script>";
+    }
+}
+
 
 
   if (mysqli_query($con, $updateQuery)) {

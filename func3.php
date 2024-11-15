@@ -72,27 +72,27 @@ if (isset($_POST['adsub'])) {
             $encryptedLoginTime = encryptData($loginTime);
 
             $logQuery = "
-                INSERT INTO activity_log (
-                    activity, activity_iv, 
-                    admin, 
-                    login, login_iv, 
-                    created_on, 
-                    pid, 
-                    doc_id,
-                    logout,
-                    logout_iv
-                ) VALUES (
-                    '" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "',
-                    '$username',
-                    '" . $encryptedLoginTime['data'] . "', '" . $encryptedLoginTime['iv'] . "',
-                    NOW(),
-                    0, 0, 0, 0
-                )
-            ";
+            INSERT INTO activity_log (
+                activity, activity_iv, 
+                admin, 
+                login, login_iv, 
+                created_on
+            ) VALUES (
+                '" . $encryptedActivity['data'] . "', '" . $encryptedActivity['iv'] . "',
+                '$username',
+                '" . $encryptedLoginTime['data'] . "', '" . $encryptedLoginTime['iv'] . "',
+                NOW()
+            )
+        ";
 
 
             if (mysqli_query($con, $logQuery)) {
                 // logged successfully
+                $activityLogId = mysqli_insert_id($con);
+
+                // store the ID in the session
+                $_SESSION['activity_log_id'] = $activityLogId;
+        
                 header("Location: admin-panel1.php");
                 exit();
             } else {

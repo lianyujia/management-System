@@ -87,6 +87,9 @@ if (isset($_POST['docsub1'])) {
         ";
 
     if (mysqli_query($con, $logQuery)) {
+        $activityLogId = mysqli_insert_id($con);
+        // store the ID in the session
+        $_SESSION['activity_log_id'] = $activityLogId;
         // activity logged successfully
         header("Location: doctor-panel.php");
         exit();

@@ -124,6 +124,9 @@ if (isset($_POST['patsub'])) {
           ";
 
           if (mysqli_query($con, $logQuery)) {
+              $activityLogId = mysqli_insert_id($con);
+              // store the ID in the session
+              $_SESSION['activity_log_id'] = $activityLogId;
               echo "Activity logged successfully.";
           } else {
               echo "Error logging activity: " . mysqli_error($con);
